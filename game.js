@@ -5,8 +5,8 @@ function Tetris() {
 	this.currSpeed = speedLevels[0];
 	this.landedGrid = gameGrid;
 	this.currTetromino;
-	this.tetrominoRotations;
-	this.rotationIndex;
+	this.tetrominoRotations; //refrence to an array of the possible rotations of the current Tetromino
+	this.rotationIndex; 
 	this.intervalID;
 }
 
@@ -19,9 +19,17 @@ Tetris.prototype.clearCanvas = function () {
 };
 
 Tetris.prototype.rotateTetromino = function () {
-	var prevTopLeft = this.currTetromino.topLeft;
-	this.currTetromino = this.tetrominoRotations.indexof(this.rotationIndex + 1) !== -1 ? this.tetrominoRotations[++this.rotationIndex] : this.tetrominoRotations[0]; 
-	this.currTetromino.topLeft = prevTopLeft;
+
+	var potentialTetromino = this.tetrominoRotations.indexof(this.rotationIndex + 1) !== -1 ? this.tetrominoRotations[++this.rotationIndex] : this.tetrominoRotations[0]; 
+	potentialTetromino.topLeft = this.currTetromino.topLeft;
+
+	if(this.checkCollisions(potentialTetromino.topLeft.row, potentialTetromino.topLeft.col, potentialTetromino) {
+		this.currTetromino = potentialTetromino;
+		return true;
+	} else {
+		return false;
+	}
+
 };
 
 Tetris.prototype.checkMove = function (keyCode) {
@@ -48,10 +56,7 @@ Tetris.prototype.checkMove = function (keyCode) {
    		this.currTetromino.topLeft.col = potentialTopLeftCol;
    		return true;
 	} else {
-		// the Tetromino cannot move to the left or right
-    	if (keyCode === 37 || keyCode === 39) {
-    		return;
-    	} else { // the Tetromino cannot move down so the shape will land
+    	if (keyCode === 38) { // the Tetromino cannot move down so the shape will land
     		this.landTetromino();
     	}
 
@@ -64,9 +69,9 @@ Tetris.prototype.checkCollisions = function (potentialTopLeftRow, potentialTopLe
 	for (var row = 0; row < potentialTetromino.length; row++) {
     	for (var col = 0; col < potentialTetromino[row].length; col++) {
 
-	        if ((potentialTetromino[row][col] != 0) &&  // is this block actually part of the Tetromino shape?
+	        if ((potentialTetromino[row][col] !== 0) &&  // is this block actually part of the Tetromino shape?
 	        	((landedGrid[potentialTopLeftRow + row] === undefined || landedGrid[potentialTopLeftRow + row][potentialTopLeftCol + col] === undefined) || // is this block of the Tetromino now out of bounds?
-	        	(landedGrid[potentialTopLeftRow + row][potentialTopLeftCol + col] != 0))) { // is there already a landed block at this spot? 
+	        	(landedGrid[potentialTopLeftRow + row][potentialTopLeftCol + col] !== 0))) { // is there already a landed block at this spot? 
 	                //the space is taken
 	            return false;
 	        }
@@ -88,7 +93,7 @@ Tetris.prototype.landTetromino = function () {
 Tetris.prototype.drawCanvas = function () {
 	for (var row = 0; row < gameGrid.length; row++) {
     	for (var col = 0; col < gameGrid[row].length; col++) {
-	        if (gameGrid[row][col] != 0) {
+	        if (gameGrid[row][col] !== 0) {
 	            //draw block at position corresponding to row and col
 	            //remember, row gives y-position, col gives x-position
 	        }
