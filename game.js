@@ -1,15 +1,30 @@
-function Tetris() {
-	this.speedLevels = [2000, 1600, 1200, 1000, 800]; 
-	this.currSpeed = this.speedLevels[0];
-	this.landedGrid = gameGrid;
+function Tetris(height, width) {
+	this.landedGrid = this.generateBoard(height, width);
+	console.log(this.landedGrid);
 	this.height = this.landedGrid.length;
 	this.width = this.landedGrid[0].length;
 	this.currTetromino;
 	this.tetrominoOrder = [];
 	this.tetrominoRotations; //refrence to an array of the possible rotations of the current Tetromino
 	this.rotationIndex; 
+	this.speedLevels = [2000, 1600, 1200, 1000, 800]; 
+	this.currSpeed = this.speedLevels[0];
 	this.intervalID;
 }
+
+Tetris.prototype.generateBoard = function (height, width) {
+
+	var gameArray = [];
+
+	for (var i = 0; i < height; i++) {
+		gameArray.push(new Array(width));
+
+    	for (var j = 0; j < width; j++)
+	        gameArray[i][j] = 0;
+   	}
+	
+	return gameArray;
+};
 
 Tetris.prototype.setUpBoard = function () {
 
@@ -129,23 +144,13 @@ Tetris.prototype.addTetromino = function () {
 		this.randomizeTetrominoOrder();
 
 	this.currTetromino = this.tetrominoOrder.pop();
-	this.currTetromino.topLeft.row = -(this.currTetromino.length - 1);
+	this.currTetromino.topLeft.row = 0;
 	this.currTetromino.topLeft.col = Math.floor(this.width/2) - Math.floor(this.currTetromino[0].length/2);
 
 	return this.checkCollisions(this.currTetromino.topLeft.row, this.currTetromino.topLeft.col, this.currTetromino);
 
 };
 
-Tetris.prototype.drawCanvas = function () {
-	for (var row = 0; row < gameGrid.length; row++) {
-    	for (var col = 0; col < gameGrid[row].length; col++) {
-	        if (gameGrid[row][col] !== 0) {
-	            //draw block at position corresponding to row and col
-	            //remember, row gives y-position, col gives x-position
-	        }
-     	}
-    }
-};
 
 Tetris.prototype.setPlay = function (speed) {
 	clearInterval(this.intervalID);
@@ -156,8 +161,4 @@ Tetris.prototype.setPlay = function (speed) {
  		this.drawCanvas();
  	}, speed );
 };
-
-var game = new Tetris();
-console.log(game.landedGrid);
-
 
