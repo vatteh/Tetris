@@ -1,28 +1,50 @@
 function Tetris(height, width) {
 	this.landedGrid = this.generateBoard(height, width);
-	console.log(this.landedGrid);
 	this.height = this.landedGrid.length;
 	this.width = this.landedGrid[0].length;
+	console.log(height);
+	console.log(width);
 	this.currTetromino;
 	this.tetrominoOrder = [];
 	this.tetrominoRotations; //refrence to an array of the possible rotations of the current Tetromino
 	this.rotationIndex; 
-	this.speedLevels = [2000, 1600, 1200, 1000, 800]; 
-	this.currSpeed = this.speedLevels[0];
+	// this.speedLevels = [2000, 1600, 1200, 1000, 800]; 
+	// this.currSpeed = this.speedLevels[0];
 	this.intervalID;
+	this.renderEngine = new RenderEngine(this);
+	this.renderEngine.render();
 }
 
 Tetris.prototype.generateBoard = function (height, width) {
 
 	var gameArray = [];
 
-	for (var i = 0; i < height; i++) {
-		gameArray.push(new Array(width));
+	// for (var i = 0; i < height; i++) {
+	// 	gameArray.push(new Array(width));
 
-    	for (var j = 0; j < width; j++)
-	        gameArray[i][j] = 0;
-   	}
+ //    	for (var j = 0; j < width; j++)
+	//         gameArray[i][j] = 0;
+ //   	}
 	
+   	var gameArray = [
+   		[0,0,0,0,0,0,0,0,0,0],
+   		[0,0,0,0,0,0,0,0,0,0],
+   		[0,0,0,0,0,0,0,0,0,0],
+   		[0,0,0,0,0,0,0,0,0,0],
+   		[0,0,0,0,0,0,0,0,0,0],
+   		[0,0,0,0,0,0,0,0,0,0],
+   		[0,0,0,0,0,0,0,0,0,0],
+   		[0,0,0,0,0,0,0,0,0,0],
+   		[0,0,0,0,0,0,0,0,0,0],
+   		[0,0,0,0,0,0,0,0,0,0],
+   		[0,0,0,0,0,0,0,0,0,0],
+   		[0,0,0,0,0,0,0,0,0,0],
+   		[0,0,0,0,0,0,0,0,0,0],
+   		[0,0,0,0,0,0,0,0,0,0],
+   		[0,0,0,0,0,0,0,0,0,0],
+   		[1,1,1,1,1,1,1,1,1,1]
+   	];
+
 	return gameArray;
 };
 
