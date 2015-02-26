@@ -18,8 +18,7 @@ Tetris.prototype.generateBoard = function (height, width) {
 	var gameArray = [];
 
 	for (var i = 0; i < height; i++) {
-		gameArray.push(new Array(width));
-
+		gameArray.push(new Array());
     	for (var j = 0; j < width; j++)
 	        gameArray[i][j] = 0;
    	}
@@ -78,7 +77,6 @@ Tetris.prototype.randomizeTetrominoOrder = function () {
 Tetris.prototype.rotateTetromino = function () {
 
 	var potentialTetromino; 
-	console.log(this.currTetromino.tetrominoRotations.length);
 	if (this.currTetromino.rotationIndex < this.currTetromino.tetrominoRotations.length-1) {
 		potentialTetromino = this.currTetromino.tetrominoRotations[this.currTetromino.rotationIndex + 1];
 	} else {
@@ -133,7 +131,6 @@ Tetris.prototype.moveTetromino = function (keyCode) {
 
 };
 
-//TODO check if checkCollisions works on game over
 Tetris.prototype.checkCollisions = function (potentialTopLeftRow, potentialTopLeftCol, potentialTetromino) {
 	for (var row = 0; row < potentialTetromino.length; row++) {
     	for (var col = 0; col < potentialTetromino[row].length; col++) {
@@ -158,7 +155,23 @@ Tetris.prototype.landTetromino = function () {
 	    }
    	}
 
+   	this.clearLines();
    	this.addTetromino();
+
+};
+
+Tetris.prototype.clearLines = function () {
+
+	for (var i = 0; i < this.landedGrid.length; i++) {
+		if (this.landedGrid[i].indexOf(0) === -1)  { // no 0 means row is filled
+			this.landedGrid.splice(i, 1);
+			var aray = new Array();
+			for (var j = 0; j < this.width; j++)
+	        	aray[j] = 0;
+			console.log(aray);
+			this.landedGrid.unshift(aray);
+		}
+	}
 
 };
 
