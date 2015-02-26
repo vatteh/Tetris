@@ -40,7 +40,7 @@ Tetris.prototype.generateBoard = function (height, width) {
 Tetris.prototype.setUpKeyEvents = function () {
 	var that = this;
 	document.body.onkeydown = function ( e ) {
-		if (e.keyCode === 37 || e.keyCode === 40 || e.keyCode === 39)
+		if (e.keyCode === 37 || e.keyCode === 40 || e.keyCode === 39 || e.keyCode === 32)
 			that.moveTetromino(e.keyCode);
 		else if (e.keyCode === 38)
 			that.rotateTetromino(e.keyCode);
@@ -52,12 +52,12 @@ Tetris.prototype.randomizeTetrominoOrder = function () {
 	 * Randomize array element order in-place.
 	 * Using Fisher-Yates shuffle algorithm.
 	 */
-	var shuffleArray = function (array) {
-	    for (var i = array.length - 1; i > 0; i--) {
+	var shuffleArray = function (aRay) {
+	    for (var i = aRay.length - 1; i > 0; i--) {
 	        var j = Math.floor(Math.random() * (i + 1));
-	        var temp = array[i];
-	        array[i] = array[j];
-	        array[j] = temp;
+	        var temp = aRay[i];
+	        aRay[i] = aRay[j];
+	        aRay[j] = temp;
 	    }
 	}
 
@@ -109,6 +109,12 @@ Tetris.prototype.moveTetromino = function (keyCode) {
 	} else if (keyCode === 40) { // Down
 		potentialTopLeftRow = this.currTetromino.topLeft.row + 1;
 		potentialTopLeftCol = this.currTetromino.topLeft.col;
+	} else if (keyCode === 32) { // SpaceBar
+		potentialTopLeftRow = this.currTetromino.topLeft.row;
+		potentialTopLeftCol = this.currTetromino.topLeft.col;
+		while (this.checkCollisions(++potentialTopLeftRow, potentialTopLeftCol, this.currTetromino)) {
+			this.currTetromino.topLeft.row = potentialTopLeftRow;
+		}
 	} else {
 		return false;
 	}
@@ -120,10 +126,10 @@ Tetris.prototype.moveTetromino = function (keyCode) {
    		this.renderEngine.render();
    		return true;
 	} else {
-    	if (keyCode === 40) { // the Tetromino cannot move down so the shape will land
+    	if (keyCode === 40 || keyCode === 32) { // the Tetromino cannot move down so the shape will land
     		this.landTetromino();
     		this.renderEngine.render();
-
+    		return true;
     	}
 
     	return false;
@@ -165,11 +171,10 @@ Tetris.prototype.clearLines = function () {
 	for (var i = 0; i < this.landedGrid.length; i++) {
 		if (this.landedGrid[i].indexOf(0) === -1)  { // no 0 means row is filled
 			this.landedGrid.splice(i, 1);
-			var aray = new Array();
+			var aRay = new Array();
 			for (var j = 0; j < this.width; j++)
-	        	aray[j] = 0;
-			console.log(aray);
-			this.landedGrid.unshift(aray);
+	        	aRay[j] = 0;
+			this.landedGrid.unshift(aRay);
 		}
 	}
 
@@ -186,6 +191,30 @@ Tetris.prototype.addTetromino = function () {
 
 };
 
+
+// need to remove found clumps from game board, then treat them as falling tetriminos
+Tetris.prototype.findClumps = function (clearedRowIndex) {
+	var clumps = [];
+
+	var remainderBoard = this.landedGrid.slice(clearedRowIndex);
+
+	for (var i = 0, len = remainderBoard.length; i < len; i++) {
+		for (var j = 0, len2 = remainderBoard[i].length; j < len2; j++) {
+			if (remainderBoard[i][j] !== 0) {
+				var clump = {};
+				clump.topLeft = {row: i, col: j};
+				clump = this.floodFill(i, j, clump, remainderBoard);
+				clumps.push(clump);
+			}
+		}
+	}
+
+	return clumps;
+};
+
+Tetris.prototype.floodFill = function (row, col, clump, remainderBoard) {
+
+};
 
 Tetris.prototype.setPlay = function (speed) {
 	clearInterval(this.intervalID);
