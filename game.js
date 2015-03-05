@@ -7,7 +7,7 @@ function Tetris(height, width) {
 	this.rotationIndex = 0; 
 	this.intervalID;
 	this.addTetromino();
-	this.setUpKeyEvents();
+	this.setUpKeyEvents(true);
 	this.renderEngine = new RenderEngine(this);
 	this.renderEngine.render();
 	this.setPlay(2000);
@@ -42,14 +42,22 @@ Tetris.prototype.generateBoard = function (height, width) {
 	return gameArray;
 };
 
-Tetris.prototype.setUpKeyEvents = function () {
+Tetris.prototype.setUpKeyEvents = function (startGame) {
 	var that = this;
-	document.body.onkeydown = function ( e ) {
-		if (e.keyCode === 37 || e.keyCode === 40 || e.keyCode === 39 || e.keyCode === 32)
-			that.moveTetromino(e.keyCode, that.currTetromino);
-		else if (e.keyCode === 38)
-			that.rotateTetromino(e.keyCode);
-	};
+
+	if(startGame) {
+		document.body.onkeydown = function ( e ) {
+			if (e.keyCode === 37 || e.keyCode === 40 || e.keyCode === 39 || e.keyCode === 32)
+				that.moveTetromino(e.keyCode, that.currTetromino);
+			else if (e.keyCode === 38)
+				that.rotateTetromino(e.keyCode);
+		};
+	} else {
+				
+		document.body.onkeydown = function ( e ) {
+
+		}
+	}
 };
 
 Tetris.prototype.randomizeTetrominoOrder = function () {
@@ -121,7 +129,6 @@ Tetris.prototype.moveTetromino = function (keyCode, tetromino) {
 		while (this.checkCollisions(++potentialTopLeftRow, potentialTopLeftCol, tetromino)) {
 			tetromino.topLeft.row = potentialTopLeftRow;
 		}
-		console.log(tetromino);
 	} else {
 		return false;
 	}
@@ -180,7 +187,12 @@ Tetris.prototype.addTetromino = function () {
 	this.currTetromino = this.tetrominoOrder.pop();
 	this.currTetromino.topLeft = {row: 0, col: Math.floor(this.width/2) - Math.floor(this.currTetromino[0].length/2)};
 	
-	return this.checkCollisions(this.currTetromino.topLeft.row, this.currTetromino.topLeft.col, this.currTetromino);
+
+	if (!this.checkCollisions(this.currTetromino.topLeft.row, this.currTetromino.topLeft.col, this.currTetromino)) {
+		this.gameOver();
+	}
+
+	 
 
 };
 
@@ -281,6 +293,13 @@ Tetris.prototype.findRowColRange = function (boardRow, boardCol, rowColRange, re
         this.findRowColRange(boardRow - 1, boardCol, rowColRange, remainderBoard);
         this.findRowColRange(boardRow, boardCol - 1, rowColRange, remainderBoard);
     }
+};
+
+Tetris.prototype.gameOver = function () { 
+	clearInterval(this.intervalID);
+	this.renderEngine.render();
+	this.setUpKeyEvents(false);
+
 };
 
 Tetris.prototype.setPlay = function (speed) {
