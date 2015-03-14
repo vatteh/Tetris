@@ -1,4 +1,4 @@
-function Tetris(height, width) {
+function Tetris(height, width, testing) {
 	this.landedGrid = this.generateBoard(height, width);
 	this.height = this.landedGrid.length;
 	this.width = this.landedGrid[0].length;
@@ -8,7 +8,8 @@ function Tetris(height, width) {
 	this.intervalID;
 	this.addTetromino();
 	this.setUpKeyEvents(true);
-	this.renderEngine = new RenderEngine(this);
+	this.testing = testing;
+	this.renderEngine = new RenderEngine(this, testing);
 	this.renderEngine.render();
 	this.setPlay(2000);
 }
@@ -18,17 +19,19 @@ Tetris.prototype.newRow = function (width) {
 	for (var i = 0; i < width; i++)
 	   	aRay[i] = 0;
 
-	   return aRay;
+	return aRay;
 };
 
 Tetris.prototype.generateBoard = function (height, width) {
 
 	var gameArray = [];
 
+	// crete empty height x width board
 	for (var i = 0; i < height; i++) {
 		gameArray.push(this.newRow(width));
    	}
 
+   	// give each of the 
    	for (var rotationArray in tetrominoRotations) {
 		if (tetrominoRotations.hasOwnProperty( rotationArray )) {
 			
@@ -299,10 +302,12 @@ Tetris.prototype.gameOver = function () {
 	clearInterval(this.intervalID);
 	this.renderEngine.render();
 	this.setUpKeyEvents(false);
-
 };
 
 Tetris.prototype.setPlay = function (speed) {
+	if (this.testing)
+		return;
+
 	clearInterval(this.intervalID);
 	
 	var that = this;
