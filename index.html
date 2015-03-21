@@ -6,19 +6,32 @@
       <link rel="stylesheet" href="game.css">
   </head>
   <body>
-    <h1>Tetris</h1>
-    <canvas id="canvas" width="" height="">
-      <p>Sorry. This game is currently not supported in your browser.</p>
-    </canvas>
+    <div class ="container group">
+      
+      <canvas id="gameboard" width="" height="">
+        <p>Sorry. This game is currently not supported in your browser.</p>
+      </canvas>
+
+      <div class="dashboard">
+        <p>Next</p>
+        <canvas id="nextboard" width="" height=""></canvas>
+        <div class="stats">
+          <p id="level"></p>
+          <p id="linesCleared"></p>
+          <p id="score"></p>
+        </div>
+        <h1>Tetris</h1>  
+      </div>
+    
+    </div>
     <script src="tetrominoRotations.js"></script>
     <script src="game.js"></script>
-    <script src="render.js">
+    <script src="render.js"></script>
     </script>
 
     <script type="text/javascript">
         var game = new Tetris(16, 10, false);
     </script>
-
 
   </body>
 </html>

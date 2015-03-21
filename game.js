@@ -3,15 +3,23 @@ function Tetris(height, width, testing) {
 	this.height = this.landedGrid.length;
 	this.width = this.landedGrid[0].length;
 	this.currTetromino;
+	this.nextTetromino;
 	this.tetrominoOrder = [];
 	this.rotationIndex = 0; 
-	this.intervalID;
+	this.currScore = 0;
+	this.currLevel = 1;
+	this.currLinesCleared = 0;
+	this.renderEngine = new RenderEngine(this, testing);
+	this.randomizeTetrominoOrder();
 	this.addTetromino();
 	this.setUpKeyEvents(true);
 	this.testing = testing;
-	this.renderEngine = new RenderEngine(this, testing);
 	this.renderEngine.render();
-	this.setPlay(2000);
+
+	this.intervalID;
+	this.playSpeed = 1500;
+	this.setPlay(this.playSpeed);
+
 }
 
 Tetris.prototype.newRow = function (width) {
@@ -26,7 +34,7 @@ Tetris.prototype.generateBoard = function (height, width) {
 
 	var gameArray = [];
 
-	// crete empty height x width board
+	// create empty height x width board
 	for (var i = 0; i < height; i++) {
 		gameArray.push(this.newRow(width));
    	}
@@ -126,12 +134,32 @@ Tetris.prototype.moveTetromino = function (keyCode, tetromino) {
 	} else if (keyCode === 40) { // Down
 		potentialTopLeftRow = tetromino.topLeft.row + 1;
 		potentialTopLeftCol = tetromino.topLeft.col;
-	} else if (keyCode === 32 || keyCode === -1) { // SpaceBar
+		this.renderEngine.drawScore(++this.currScore);
+		// console.log(this.currScore);
+	} else if (keyCode === -2) { // tick
+		potentialTopLeftRow = tetromino.topLeft.row + 1;
+		potentialTopLeftCol = tetromino.topLeft.col;
+	} else if (keyCode === 32) { // SpaceBar
 		potentialTopLeftRow = tetromino.topLeft.row;
 		potentialTopLeftCol = tetromino.topLeft.col;
+
+		var rowsDropped = 0;
+		while (this.checkCollisions(++potentialTopLeftRow, potentialTopLeftCol, tetromino)) {
+			tetromino.topLeft.row = potentialTopLeftRow;
+			rowsDropped++;
+		}
+
+		this.currScore += rowsDropped * 2;
+		this.renderEngine.drawScore(this.currScore);
+		// console.log(this.currScore);
+	} else if (keyCode === -1) { // clump drop
+		potentialTopLeftRow = tetromino.topLeft.row;
+		potentialTopLeftCol = tetromino.topLeft.col;
+
 		while (this.checkCollisions(++potentialTopLeftRow, potentialTopLeftCol, tetromino)) {
 			tetromino.topLeft.row = potentialTopLeftRow;
 		}
+
 	} else {
 		return false;
 	}
@@ -143,10 +171,12 @@ Tetris.prototype.moveTetromino = function (keyCode, tetromino) {
    		this.renderEngine.render();
    		return true;
 	} else {
-    	if (keyCode === 40 || keyCode === 32 || keyCode === -1) { // the Tetromino cannot move down so the shape will land
+    	if (keyCode === 40 || keyCode === 32 || keyCode === -1 || keyCode === -2) { // the Tetromino cannot move down so the shape will land
     		this.landTetromino(tetromino);
-    		if (keyCode !== -1)
+    		if (keyCode !== -1) {
+   				this.addTetromino();
     			this.renderEngine.render();
+    		}
    			return true;
     	}
 
@@ -179,48 +209,57 @@ Tetris.prototype.landTetromino = function (tetromino) {
    	}
 
    	this.clearRowsAdvance();
-   	this.addTetromino();
 
 };
 
 Tetris.prototype.addTetromino = function () {
-	if (this.tetrominoOrder.length === 0) 
-		this.randomizeTetrominoOrder();
+	this.currTetromino = this.tetrominoOrder.shift();
 
-	this.currTetromino = this.tetrominoOrder.pop();
+	if (this.tetrominoOrder.length === 0) {
+		this.randomizeTetrominoOrder();
+		// console.log("filled");
+	}
+
+	// console.log(this.tetrominoOrder.length);
+
+	this.nextTetromino = this.tetrominoOrder[0];
+	this.renderEngine.renderNextBoard();
 	this.currTetromino.topLeft = {row: 0, col: Math.floor(this.width/2) - Math.floor(this.currTetromino[0].length/2)};
 	
-
 	if (!this.checkCollisions(this.currTetromino.topLeft.row, this.currTetromino.topLeft.col, this.currTetromino)) {
 		this.gameOver();
 	}
-
-	 
 
 };
 
 Tetris.prototype.clearRowsBasic = function () {
 
+	var rowCombo = 0;
+
 	for (var i = 0, len = this.landedGrid.length; i < len; i++) {
 		if (this.landedGrid[i].indexOf(0) === -1)  { // no 0's means row is filled
 			this.landedGrid.splice(i, 1);
 			this.landedGrid.unshift(this.newRow(this.width));
+			rowCombo++;
 		}
 	}
+
+	this.calculateRowCombo(rowCombo, i);
 };
 
 Tetris.prototype.clearRowsAdvance = function () {
 	var lastRowCleared;
-
+	var rowCombo = 0;
 	for (var i = 0, len = this.landedGrid.length; i < len; i++) {
 		if (this.landedGrid[i].indexOf(0) === -1)  { // no 0's means row is filled
 			this.landedGrid.splice(i, 1, this.newRow(this.width));
+			rowCombo++;
 			lastRowCleared = i;
 		}
 	}
 
 	if (lastRowCleared !== undefined) {
-
+		this.calculateRowCombo(rowCombo, lastRowCleared);
 		var clumps = this.findClumps(lastRowCleared); // from this row up, we need to find the 'clumps' of blocks and treat them as falling Tetrominos
 		
 		while (clumps.length > 0) {
@@ -229,8 +268,31 @@ Tetris.prototype.clearRowsAdvance = function () {
 	}
 };
 
+Tetris.prototype.calculateRowCombo = function( rowsCleared, lastRowCleared ) {
+	this.currLinesCleared += rowsCleared;
+	this.currScore += (100 + (rowsCleared - 1)*200) * this.currLevel;
+	this.renderEngine.drawScore(this.currScore);
+	this.renderEngine.drawLinesCleared(this.currLinesCleared);
+	this.levelUp();
+	
+	// this.renderEngine.rowsClearedAnimation(rowsCleared, lastRowCleared);
+	// console.log(this.currScore);
+};
+
+Tetris.prototype.levelUp = function() {
+	if (this.currLinesCleared % 10 === 0) {
+
+		this.currLevel = Math.floor(this.currLinesCleared / 10) + 1;
+		console.log("levelUp: ", this.currLevel);
+		this.playSpeed = this.playSpeed / 1.5;
+		this.setPlay(this.playSpeed);
+		this.renderEngine.drawLevel(this.currLevel); 
+	}
+	
+};
+
 // need to remove found clumps from game board, then treat them as falling tetriminos
-Tetris.prototype.findClumps = function (clearedRowIndex) {
+Tetris.prototype.findClumps = function ( clearedRowIndex ) {
 	var clumps = [];
 
 	var remainderBoard = this.landedGrid.slice(0, clearedRowIndex);
@@ -313,7 +375,7 @@ Tetris.prototype.setPlay = function (speed) {
 	var that = this;
 
 	this.intervalID = window.setInterval( function() {
- 		that.moveTetromino(40, that.currTetromino);
+ 		that.moveTetromino(-2, that.currTetromino);
  	}, speed );
 };
 
