@@ -86,6 +86,7 @@ RenderEngine.prototype.drawBlock = function( i, j, colorArray, ctx) {
     ctx.lineTo( this.BLOCK_WIDTH * j + bevelThickness + highlightThickness, this.BLOCK_HEIGHT * i + bevelThickness + (this.BLOCK_HEIGHT - bevelThickness*2) - highlightThickness );
     ctx.closePath();
     ctx.fill();
+
 };
 
 // draws the landed board and the current Tetromino
@@ -95,6 +96,7 @@ RenderEngine.prototype.render = function() {
 
     this.ctx.clearRect( 0, 0, this.BOARD_WIDTH, this.BOARD_HEIGHT );
 
+    this.renderGhost();
     // render the landed grid
     this.ctx.strokeStyle = 'black';
     for ( var i = 0; i < this.game.landedGrid.length; i++ ) {
@@ -116,6 +118,29 @@ RenderEngine.prototype.render = function() {
     }
 };
 
+RenderEngine.prototype.renderGhost = function() {
+    var potentialGhostTopLeftRow = this.game.currTetromino.topLeft.row;
+    var ghostTopLeftRow = this.game.currTetromino.topLeft.row;
+    var ghostTopLeftCol = this.game.currTetromino.topLeft.col;
+
+    while (this.game.checkCollisions(++potentialGhostTopLeftRow, this.game.currTetromino.topLeft.col, this.game.currTetromino)) {
+        ghostTopLeftRow = potentialGhostTopLeftRow;
+    }
+
+    // render the current Tetromino
+    this.ctx.lineWidth = 1.5;
+    this.ctx.lineJoin = 'round';
+    this.ctx.fillStyle = 'grey';
+    for ( var i = 0; i < this.game.currTetromino.length; i++ ) {
+        for ( var j = 0; j < this.game.currTetromino[0].length; j++ ) {
+            if ( this.game.currTetromino[ i ][ j ] ) {
+                this.ctx.fillRect( this.BLOCK_WIDTH * (j + ghostTopLeftCol) + 1, this.BLOCK_HEIGHT * (i + ghostTopLeftRow) + 1, this.BLOCK_WIDTH - 3 , this.BLOCK_HEIGHT - 3 );
+            }
+        }
+    }
+    
+};
+
 RenderEngine.prototype.renderNextBoard = function() {
     if (this.testing)
         return;
@@ -132,8 +157,6 @@ RenderEngine.prototype.renderNextBoard = function() {
     var heightOffset = nextBoardMiddleH - nextTetrominoMiddleH;
     var widthOffset = nextBoardMiddleW - nextTetrominoMiddleW;
 
-    // console.log(heightOffset);
-    // console.log(widthOffset);
     // render the next board
     this.nextCtx.strokeStyle = 'white';
     for ( var i = 0; i < this.game.nextTetromino.length; i++ ) {

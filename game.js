@@ -17,7 +17,7 @@ function Tetris(height, width, testing) {
 	this.renderEngine.render();
 
 	this.intervalID;
-	this.playSpeed = 1500;
+	this.playSpeed = 1000;
 	this.setPlay(this.playSpeed);
 
 }
@@ -135,7 +135,6 @@ Tetris.prototype.moveTetromino = function (keyCode, tetromino) {
 		potentialTopLeftRow = tetromino.topLeft.row + 1;
 		potentialTopLeftCol = tetromino.topLeft.col;
 		this.renderEngine.drawScore(++this.currScore);
-		// console.log(this.currScore);
 	} else if (keyCode === -2) { // tick
 		potentialTopLeftRow = tetromino.topLeft.row + 1;
 		potentialTopLeftCol = tetromino.topLeft.col;
@@ -151,7 +150,6 @@ Tetris.prototype.moveTetromino = function (keyCode, tetromino) {
 
 		this.currScore += rowsDropped * 2;
 		this.renderEngine.drawScore(this.currScore);
-		// console.log(this.currScore);
 	} else if (keyCode === -1) { // clump drop
 		potentialTopLeftRow = tetromino.topLeft.row;
 		potentialTopLeftCol = tetromino.topLeft.col;
@@ -168,6 +166,7 @@ Tetris.prototype.moveTetromino = function (keyCode, tetromino) {
 		// the Tetromino can move to new position 
    		tetromino.topLeft.row = potentialTopLeftRow;
    		tetromino.topLeft.col = potentialTopLeftCol;
+
    		this.renderEngine.render();
    		return true;
 	} else {
@@ -283,8 +282,7 @@ Tetris.prototype.levelUp = function() {
 	if (this.currLinesCleared % 10 === 0) {
 
 		this.currLevel = Math.floor(this.currLinesCleared / 10) + 1;
-		console.log("levelUp: ", this.currLevel);
-		this.playSpeed = this.playSpeed / 1.5;
+		this.playSpeed = this.playSpeed / 1.3;
 		this.setPlay(this.playSpeed);
 		this.renderEngine.drawLevel(this.currLevel); 
 	}
