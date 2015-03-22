@@ -6,6 +6,15 @@ body {
   color: white;
 }
 
+h1#game-title {
+   font-size: 56px;
+}
+
+p#game-over {
+  font-size: 24px;
+  color: red;
+}
+
 .container {
 	width: 500px;
 	margin: 30px auto;

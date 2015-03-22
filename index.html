@@ -4,23 +4,26 @@
       <meta http-equiv="Content-type" content="text/html; charset=utf-8">      
       <title>Tetris</title>
       <link rel="stylesheet" href="game.css">
+      <link rel="shortcut icon" href="images/favicon.ico" type="image/x-icon">
+      <link rel="icon" href="images/favicon.ico" type="image/x-icon">
   </head>
   <body>
     <div class ="container group">
       
       <canvas id="gameboard" width="" height="">
-        <p>Sorry. This game is currently not supported in your browser.</p>
+        <p>Sorry :( This game is currently not supported in your browser.</p>
       </canvas>
 
       <div class="dashboard">
-        <p>Next</p>
+        <h3>Next Piece:</h3>
         <canvas id="nextboard" width="" height=""></canvas>
         <div class="stats">
           <p id="level"></p>
           <p id="linesCleared"></p>
           <p id="score"></p>
         </div>
-        <h1>Tetris</h1>  
+        <h1 id='game-title'>Tetris</h1>
+        <p id='game-over'></p>  
       </div>
     
     </div>

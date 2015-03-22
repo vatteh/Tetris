@@ -33,6 +33,7 @@ function RenderEngine(game, testing) {
     this.level = document.getElementById( 'level' );
     this.linesCleared = document.getElementById( 'linesCleared' );
     this.score = document.getElementById( 'score' );
+    this.gameOver = document.getElementById( 'game-over' );
 
     this.drawLevel( 1 );
     this.drawLinesCleared( 0 );
@@ -41,15 +42,27 @@ function RenderEngine(game, testing) {
 };
 
 RenderEngine.prototype.drawLevel = function( level ) {
+    if (this.testing)
+        return;
     this.level.innerHTML = "Current Level: " + level;
 };
 
 RenderEngine.prototype.drawLinesCleared = function( linesCleared ) {
+    if (this.testing)
+        return;
     this.linesCleared.innerHTML = "Lines Cleared: " + linesCleared;
 };
 
 RenderEngine.prototype.drawScore = function( score ) {
+    if (this.testing)
+        return;
     this.score.innerHTML = "Score: " + score;
+};
+
+RenderEngine.prototype.drawGameOver = function() {
+    if (this.testing)
+        return;
+    this.gameOver.innerHTML = "Game Over";
 };
 
 //draw a single square at (x, y)
@@ -119,6 +132,8 @@ RenderEngine.prototype.render = function() {
 };
 
 RenderEngine.prototype.renderGhost = function() {
+    if (this.testing)
+        return;
     var potentialGhostTopLeftRow = this.game.currTetromino.topLeft.row;
     var ghostTopLeftRow = this.game.currTetromino.topLeft.row;
     var ghostTopLeftCol = this.game.currTetromino.topLeft.col;

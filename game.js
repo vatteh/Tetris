@@ -274,17 +274,15 @@ Tetris.prototype.calculateRowCombo = function( rowsCleared, lastRowCleared ) {
 	this.renderEngine.drawLinesCleared(this.currLinesCleared);
 	this.levelUp();
 	
-	// this.renderEngine.rowsClearedAnimation(rowsCleared, lastRowCleared);
-	// console.log(this.currScore);
 };
 
 Tetris.prototype.levelUp = function() {
-	if (this.currLinesCleared % 10 === 0) {
+	if (this.currLinesCleared / 10 >= this.currLevel) {
 
-		this.currLevel = Math.floor(this.currLinesCleared / 10) + 1;
+		this.currLevel++;
 		this.playSpeed = this.playSpeed / 1.3;
 		this.setPlay(this.playSpeed);
-		this.renderEngine.drawLevel(this.currLevel); 
+		this.renderEngine.drawLevel(this.currLevel);
 	}
 	
 };
@@ -362,6 +360,8 @@ Tetris.prototype.gameOver = function () {
 	clearInterval(this.intervalID);
 	this.renderEngine.render();
 	this.setUpKeyEvents(false);
+
+	this.renderEngine.drawGameOver();
 };
 
 Tetris.prototype.setPlay = function (speed) {
