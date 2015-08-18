@@ -1,0 +1,19 @@
+{
+	"name": "Tetris",
+	"description": "Implementing Tetris using Javascript and Easel.js",
+	"main": "index.html",
+	"author": "Victor Atteh",
+	"licence": "MIT",
+	"repository": {
+	  "type": "git",
+	  "url": "https://github.com/vatteh/Tetris.git"
+	},
+	"devDependencies": {
+		"grunt": "*",
+		"browserify": "*",
+		"grunt-browserify": "*",
+		"grunt-contrib-watch": "*",
+		"grunt-contrib-copy": "*",
+		"grunt-contrib-connect": "*"
+	}  
+}

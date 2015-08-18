@@ -1,3 +1,6 @@
+var tetrominoRotations = require('./tetrominoRotations');
+var RenderEngine = require('./render');
+
 function Tetris(height, width, testing) {
 	this.landedGrid = this.generateBoard(height, width);
 	this.height = this.landedGrid.length;
@@ -14,11 +17,19 @@ function Tetris(height, width, testing) {
 	this.addTetromino();
 	this.setUpKeyEvents(true);
 	this.testing = testing;
-	this.renderEngine.render();
+	this.renderEngine.renderGameBoard();
 
 	this.intervalID;
 	this.playSpeed = 1000;
 	this.setPlay(this.playSpeed);
+
+	this.keyCodes = {
+		37: 'left',
+		39: 'right',
+		40: 'down',
+		38: 'up',
+		32: 'spacebar'
+	};
 
 }
 
@@ -59,15 +70,12 @@ Tetris.prototype.setUpKeyEvents = function (startGame) {
 	if(startGame) {
 		document.body.onkeydown = function ( e ) {
 			if (e.keyCode === 37 || e.keyCode === 40 || e.keyCode === 39 || e.keyCode === 32)
-				that.moveTetromino(e.keyCode, that.currTetromino);
+				that.moveTetromino(that.keyCodes[e.keyCode], that.currTetromino);
 			else if (e.keyCode === 38)
-				that.rotateTetromino(e.keyCode);
+				that.rotateTetromino();
 		};
-	} else {
-				
-		document.body.onkeydown = function ( e ) {
-
-		}
+	} else {	
+		document.body.onkeydown = function ( e ) {}
 	}
 };
 
@@ -112,7 +120,7 @@ Tetris.prototype.rotateTetromino = function () {
 
 	if(this.checkCollisions(potentialTetromino.topLeft.row, potentialTetromino.topLeft.col, potentialTetromino)) {
 		this.currTetromino = potentialTetromino;
-		this.renderEngine.render();
+		this.renderEngine.renderGameBoard();
 		return true;
 	} else {
 		return false;
@@ -125,20 +133,20 @@ Tetris.prototype.moveTetromino = function (keyCode, tetromino) {
 	var potentialTopLeftRow;
 	var potentialTopLeftCol;
 
-	if (keyCode === 37) { // Left
+	if (keyCode === 'left') { // Left
 		potentialTopLeftRow = tetromino.topLeft.row;
 		potentialTopLeftCol = tetromino.topLeft.col - 1;
-	} else if (keyCode === 39) { // Right
+	} else if (keyCode === 'right') { // Right
 		potentialTopLeftRow = tetromino.topLeft.row;
 		potentialTopLeftCol = tetromino.topLeft.col + 1;
-	} else if (keyCode === 40) { // Down
+	} else if (keyCode === 'down') { // Down
 		potentialTopLeftRow = tetromino.topLeft.row + 1;
 		potentialTopLeftCol = tetromino.topLeft.col;
 		this.renderEngine.drawScore(++this.currScore);
-	} else if (keyCode === -2) { // tick
+	} else if (keyCode === 'tick') { // tick
 		potentialTopLeftRow = tetromino.topLeft.row + 1;
 		potentialTopLeftCol = tetromino.topLeft.col;
-	} else if (keyCode === 32) { // SpaceBar
+	} else if (keyCode === 'spacebar') { // SpaceBar
 		potentialTopLeftRow = tetromino.topLeft.row;
 		potentialTopLeftCol = tetromino.topLeft.col;
 
@@ -150,7 +158,7 @@ Tetris.prototype.moveTetromino = function (keyCode, tetromino) {
 
 		this.currScore += rowsDropped * 2;
 		this.renderEngine.drawScore(this.currScore);
-	} else if (keyCode === -1) { // clump drop
+	} else if (keyCode === 'clumpdrop') { // clump drop
 		potentialTopLeftRow = tetromino.topLeft.row;
 		potentialTopLeftCol = tetromino.topLeft.col;
 
@@ -167,14 +175,14 @@ Tetris.prototype.moveTetromino = function (keyCode, tetromino) {
    		tetromino.topLeft.row = potentialTopLeftRow;
    		tetromino.topLeft.col = potentialTopLeftCol;
 
-   		this.renderEngine.render();
+   		this.renderEngine.renderGameBoard();
    		return true;
 	} else {
-    	if (keyCode === 40 || keyCode === 32 || keyCode === -1 || keyCode === -2) { // the Tetromino cannot move down so the shape will land
+    	if (keyCode === 'down' || keyCode === 'spacebar' || keyCode === 'clumpdrop' || keyCode === 'tick') { // the Tetromino cannot move down so the shape will land
     		this.landTetromino(tetromino);
-    		if (keyCode !== -1) {
+    		if (keyCode !== 'clumpdrop') {
    				this.addTetromino();
-    			this.renderEngine.render();
+    			this.renderEngine.renderGameBoard();
     		}
    			return true;
     	}
@@ -216,10 +224,7 @@ Tetris.prototype.addTetromino = function () {
 
 	if (this.tetrominoOrder.length === 0) {
 		this.randomizeTetrominoOrder();
-		// console.log("filled");
 	}
-
-	// console.log(this.tetrominoOrder.length);
 
 	this.nextTetromino = this.tetrominoOrder[0];
 	this.renderEngine.renderNextBoard();
@@ -243,33 +248,44 @@ Tetris.prototype.clearRowsBasic = function () {
 		}
 	}
 
-	this.calculateRowCombo(rowCombo, i);
+	this.calculateRowCombo(rowCombo);
 };
 
 Tetris.prototype.clearRowsAdvance = function () {
 	var lastRowCleared;
 	var rowCombo = 0;
+	var lineClearIndexes = [];
 	for (var i = 0, len = this.landedGrid.length; i < len; i++) {
 		if (this.landedGrid[i].indexOf(0) === -1)  { // no 0's means row is filled
-			this.landedGrid.splice(i, 1, this.newRow(this.width));
+			lineClearIndexes.push(i);
 			rowCombo++;
 			lastRowCleared = i;
 		}
 	}
 
+	//this.renderEngine.renderLineClearAnimation(lineClearIndexes);
+
+	// find way to pause
+	lineClearIndexes.forEach(function(element) {
+		this.landedGrid.splice(element, 1, this.newRow(this.width));
+	}.bind(this));
+
 	if (lastRowCleared !== undefined) {
-		this.calculateRowCombo(rowCombo, lastRowCleared);
+		this.calculateRowCombo(rowCombo);
 		var clumps = this.findClumps(lastRowCleared); // from this row up, we need to find the 'clumps' of blocks and treat them as falling Tetrominos
 		
 		while (clumps.length > 0) {
-			this.moveTetromino(-1, clumps.pop());
+			this.moveTetromino('clumpdrop', clumps.pop());
 		}
 	}
+
+	this.renderEngine.renderGameBoard();
+
 };
 
-Tetris.prototype.calculateRowCombo = function( rowsCleared, lastRowCleared ) {
+Tetris.prototype.calculateRowCombo = function( rowsCleared ) {
 	this.currLinesCleared += rowsCleared;
-	this.currScore += (100 + (rowsCleared - 1)*200) * this.currLevel;
+	this.currScore += (100 + (rowsCleared - 1) * 200) * this.currLevel;
 	this.renderEngine.drawScore(this.currScore);
 	this.renderEngine.drawLinesCleared(this.currLinesCleared);
 	this.levelUp();
@@ -316,7 +332,6 @@ Tetris.prototype.findClumps = function ( clearedRowIndex ) {
 		for (var a = 0, len = clump.length; a < len; a++) {
 			for (var b = 0, len2 = clump[0].length; b < len2; b++) {
 				if ( remainderBoardCopy[clump.topLeft.row + a][clump.topLeft.col + b] > 0 ) {
-					//console.log("Row: " + (clump.topLeft.row + a) + " Col: " + (clump.topLeft.col + b));
 					clump[a][b] = remainderBoardCopy[clump.topLeft.row + a][clump.topLeft.col + b];
 				}
 			}
@@ -358,7 +373,7 @@ Tetris.prototype.findRowColRange = function (boardRow, boardCol, rowColRange, re
 
 Tetris.prototype.gameOver = function () { 
 	clearInterval(this.intervalID);
-	this.renderEngine.render();
+	this.renderEngine.renderGameBoard();
 	this.setUpKeyEvents(false);
 
 	this.renderEngine.drawGameOver();
@@ -373,7 +388,11 @@ Tetris.prototype.setPlay = function (speed) {
 	var that = this;
 
 	this.intervalID = window.setInterval( function() {
- 		that.moveTetromino(-2, that.currTetromino);
+ 		that.moveTetromino('tick', that.currTetromino);
  	}, speed );
 };
+
+(function() {
+	var game = new Tetris(16, 10, false);
+})();
 

@@ -80,3 +80,6 @@ tetrominoRotations.Z = [
  [7,7],
  [7,0]]
 ];
+
+module.exports = tetrominoRotations;
+
