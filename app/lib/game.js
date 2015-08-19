@@ -1,4 +1,4 @@
-var tetrominoRotations = require('./tetrominoRotations');
+var tetrominos = require('./tetrominos');
 var RenderEngine = require('./render');
 
 function Tetris(height, width, testing) {
@@ -34,11 +34,11 @@ function Tetris(height, width, testing) {
 }
 
 Tetris.prototype.newRow = function (width) {
-	var aRay = new Array();
+	var row = new Array();
 	for (var i = 0; i < width; i++)
-	   	aRay[i] = 0;
+	   	row[i] = undefined;
 
-	return aRay;
+	return row;
 };
 
 Tetris.prototype.generateBoard = function (height, width) {
@@ -49,17 +49,6 @@ Tetris.prototype.generateBoard = function (height, width) {
 	for (var i = 0; i < height; i++) {
 		gameArray.push(this.newRow(width));
    	}
-
-   	// give each of the 
-   	for (var rotationArray in tetrominoRotations) {
-		if (tetrominoRotations.hasOwnProperty( rotationArray )) {
-			
-			tetrominoRotations[rotationArray].forEach(function(val, index, array) {
-				val.rotationIndex = index;
-				val.tetrominoRotations = array;
-			});
-		}
-	}
 
 	return gameArray;
 };
@@ -80,10 +69,7 @@ Tetris.prototype.setUpKeyEvents = function (startGame) {
 };
 
 Tetris.prototype.randomizeTetrominoOrder = function () {
-	/**
-	 * Randomize array element order in-place.
-	 * Using Fisher-Yates shuffle algorithm.
-	 */
+	//Randomize array element order in-place. Using Fisher-Yates shuffle algorithm.
 	var shuffleArray = function (aRay) {
 	    for (var i = aRay.length - 1; i > 0; i--) {
 	        var j = Math.floor(Math.random() * (i + 1));
@@ -94,38 +80,41 @@ Tetris.prototype.randomizeTetrominoOrder = function () {
 	}
 
 	this.tetrominoOrder = [
-							tetrominoRotations.I[0], tetrominoRotations.I[1], 
-							tetrominoRotations.J[0], tetrominoRotations.J[1], 
-							tetrominoRotations.L[0], tetrominoRotations.L[1],
-							tetrominoRotations.O[0], tetrominoRotations.O[0],
-							tetrominoRotations.S[0], tetrominoRotations.S[1],
-							tetrominoRotations.T[0], tetrominoRotations.T[1],
-							tetrominoRotations.Z[0], tetrominoRotations.Z[1]
-						   ];
+		tetrominos.I, 
+		tetrominos.J, 
+		tetrominos.L, 
+		tetrominos.O, 
+		tetrominos.S, 
+		tetrominos.T, 
+		tetrominos.Z 
+	   ];
 	
 	shuffleArray(this.tetrominoOrder);
 };
 
-// Rotates this.currTetromino
+// Rotates this.currTetromino 90 degrees clockwise and checks if collisions occur
 Tetris.prototype.rotateTetromino = function () {
+	// place rotated currTetromino into potentialTetromino
+	var potentialTetromino = []; 
+	for (var i = 0, len = this.currTetromino.length; i < len; i++) {
+		for (var j = 0, len2 = this.currTetromino[i].length; j < len2; j++) {
+			if (!potentialTetromino[j]) {
+				potentialTetromino[j] = [];
+			}
 
-	var potentialTetromino; 
-	if (this.currTetromino.rotationIndex < this.currTetromino.tetrominoRotations.length-1) {
-		potentialTetromino = this.currTetromino.tetrominoRotations[this.currTetromino.rotationIndex + 1];
-	} else {
-		potentialTetromino = this.currTetromino.tetrominoRotations[0];
+			potentialTetromino[j].unshift(this.currTetromino[i][j]);	
+		}
 	}
 
 	potentialTetromino.topLeft = this.currTetromino.topLeft;
 
-	if(this.checkCollisions(potentialTetromino.topLeft.row, potentialTetromino.topLeft.col, potentialTetromino)) {
+	if (this.checkCollisions(potentialTetromino.topLeft.row, potentialTetromino.topLeft.col, potentialTetromino)) {
 		this.currTetromino = potentialTetromino;
 		this.renderEngine.renderGameBoard();
 		return true;
 	} else {
 		return false;
 	}
-
 };
 
 Tetris.prototype.moveTetromino = function (keyCode, tetromino) {
