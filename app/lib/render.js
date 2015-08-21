@@ -75,7 +75,7 @@ RenderEngine.prototype.drawBlock = function(i, j, colorArray, strokeColor) {
     // light
     block.graphics
         .beginFill(colorArray[1])
-        .setStrokeStyle(2,"round")
+        .setStrokeStyle(2, "round")
         .beginStroke(strokeColor)
         .drawRect(this.BLOCK_WIDTH * j, this.BLOCK_HEIGHT * i, this.BLOCK_WIDTH - 1, this.BLOCK_HEIGHT - 1)
         .endStroke()
@@ -84,26 +84,26 @@ RenderEngine.prototype.drawBlock = function(i, j, colorArray, strokeColor) {
     // dark
     block.graphics
         .beginFill(colorArray[0])
-        .moveTo( this.BLOCK_WIDTH * j, this.BLOCK_HEIGHT * i)
-        .lineTo( this.BLOCK_WIDTH * j, this.BLOCK_HEIGHT * i + this.BLOCK_HEIGHT - 1 )
-        .lineTo( this.BLOCK_WIDTH * j + this.BLOCK_WIDTH - 1, this.BLOCK_HEIGHT * i + this.BLOCK_HEIGHT - 1 )
+        .moveTo(this.BLOCK_WIDTH * j, this.BLOCK_HEIGHT * i)
+        .lineTo(this.BLOCK_WIDTH * j, this.BLOCK_HEIGHT * i + this.BLOCK_HEIGHT - 1)
+        .lineTo(this.BLOCK_WIDTH * j + this.BLOCK_WIDTH - 1, this.BLOCK_HEIGHT * i + this.BLOCK_HEIGHT - 1)
         .endFill();
 
     // base
     var bevelThickness = this.BLOCK_WIDTH / 6;
     block.graphics
         .beginFill(colorArray[2])
-        .drawRect( this.BLOCK_WIDTH * j + bevelThickness, this.BLOCK_HEIGHT * i + bevelThickness, this.BLOCK_WIDTH - 1 - (bevelThickness * 2), this.BLOCK_HEIGHT - 1 - (bevelThickness * 2) )
+        .drawRect(this.BLOCK_WIDTH * j + bevelThickness, this.BLOCK_HEIGHT * i + bevelThickness, this.BLOCK_WIDTH - 1 - (bevelThickness * 2), this.BLOCK_HEIGHT - 1 - (bevelThickness * 2))
         .endFill();
 
     // highlight
     var highlightThickness = bevelThickness / 2;
     block.graphics
         .beginFill(colorArray[3])
-        .moveTo( this.BLOCK_WIDTH * j + bevelThickness, this.BLOCK_HEIGHT * i + bevelThickness )
-        .lineTo( this.BLOCK_WIDTH * j + bevelThickness, this.BLOCK_HEIGHT * i + bevelThickness + (this.BLOCK_HEIGHT - bevelThickness*2) )
-        .lineTo( this.BLOCK_WIDTH * j + bevelThickness + (this.BLOCK_WIDTH - bevelThickness*2), this.BLOCK_HEIGHT * i + bevelThickness + (this.BLOCK_HEIGHT - bevelThickness*2) )
-        .lineTo( this.BLOCK_WIDTH * j + bevelThickness + highlightThickness, this.BLOCK_HEIGHT * i + bevelThickness + (this.BLOCK_HEIGHT - bevelThickness*2) - highlightThickness )
+        .moveTo(this.BLOCK_WIDTH * j + bevelThickness, this.BLOCK_HEIGHT * i + bevelThickness)
+        .lineTo(this.BLOCK_WIDTH * j + bevelThickness, this.BLOCK_HEIGHT * i + bevelThickness + (this.BLOCK_HEIGHT - bevelThickness * 2))
+        .lineTo(this.BLOCK_WIDTH * j + bevelThickness + (this.BLOCK_WIDTH - bevelThickness * 2), this.BLOCK_HEIGHT * i + bevelThickness + (this.BLOCK_HEIGHT - bevelThickness * 2))
+        .lineTo(this.BLOCK_WIDTH * j + bevelThickness + highlightThickness, this.BLOCK_HEIGHT * i + bevelThickness + (this.BLOCK_HEIGHT - bevelThickness * 2) - highlightThickness)
         .closePath()
         .endFill();
 
@@ -125,28 +125,25 @@ RenderEngine.prototype.renderGameBoard = function() {
 };
 
 RenderEngine.prototype.renderCurrTetromino = function() {
-
-    for ( var i = 0, len = this.game.currTetromino.length; i < len; i++ ) {
-        for ( var j = 0, len2 = this.game.currTetromino[i].length; j < len2; j++ ) {
-            if ( this.game.currTetromino[ i ][ j ] ) {
-                var block = this.drawBlock( this.game.currTetromino.topLeft.row + i, this.game.currTetromino.topLeft.col + j, this.tetrominoColors[ this.game.currTetromino[ i ][ j ] ], 'white');
+    for (var i = 0, len = this.game.currTetromino.length; i < len; i++) {
+        for (var j = 0, len2 = this.game.currTetromino[i].length; j < len2; j++) {
+            if (this.game.currTetromino[i][j] !== null) {
+                var block = this.drawBlock(this.game.currTetromino.topLeft.row + i, this.game.currTetromino.topLeft.col + j, this.tetrominoColors[this.game.currTetromino[i][j].color], 'white');
                 this.stage.addChild(block);
             }
         }
     }
-    
 };
 
 RenderEngine.prototype.renderLandedGrid = function(lineIndexArray) {
     // render the landed grid
     var lineContainers = [];
-    for ( var i = 0, len = this.game.landedGrid.length; i < len; i++ ) {
-
+    for (var i = 0, len = this.game.landedGrid.length; i < len; i++) {
         var lineContainer = new createjs.Container();
 
-        for ( var j = 0, len2 = this.game.landedGrid[i].length; j < len2; j++ ) {
-            if ( this.game.landedGrid[i][j] ) {
-                var block = this.drawBlock( i, j, this.tetrominoColors[ this.game.landedGrid[i][j] ], 'black');
+        for (var j = 0, len2 = this.game.landedGrid[i].length; j < len2; j++) {
+            if (this.game.landedGrid[i][j] !== null) {
+                var block = this.drawBlock(i, j, this.tetrominoColors[this.game.landedGrid[i][j].color], 'black');
                 lineContainer.addChild(block);
             }
         }
@@ -165,7 +162,7 @@ RenderEngine.prototype.renderLineClearAnimation = function(lineIndexArray) {
 
     var that = this;
     var lineContainers = this.renderLandedGrid(lineIndexArray);
-    lineContainers.forEach( function(element) { 
+    lineContainers.forEach(function(element) { 
 
 
         // createjs.Tween.get(element)
@@ -184,7 +181,6 @@ RenderEngine.prototype.renderLineClearAnimation = function(lineIndexArray) {
             requestAnimationFrame(animate);  
             TWEEN.update();
         }
-
     });
 };
 
@@ -192,8 +188,7 @@ RenderEngine.prototype.renderGhost = function() {
     if (this.testing)
         return;
 
-    var potentialGhostTopLeftRow = this.game.currTetromino.topLeft.row;
-    var ghostTopLeftRow = this.game.currTetromino.topLeft.row;
+    var ghostTopLeftRow = potentialGhostTopLeftRow = this.game.currTetromino.topLeft.row;
     var ghostTopLeftCol = this.game.currTetromino.topLeft.col;
 
     while (this.game.checkCollisions(++potentialGhostTopLeftRow, this.game.currTetromino.topLeft.col, this.game.currTetromino)) {
@@ -201,22 +196,21 @@ RenderEngine.prototype.renderGhost = function() {
     }
 
     // render the ghost Tetromino
-    for ( var i = 0, len = this.game.currTetromino.length; i < len; i++ ) {
-        for ( var j = 0, len2 = this.game.currTetromino[i].length; j < len2; j++ ) {
-            if ( this.game.currTetromino[ i ][ j ] ) {
+    for (var i = 0, len = this.game.currTetromino.length; i < len; i++) {
+        for (var j = 0, len2 = this.game.currTetromino[i].length; j < len2; j++) {
+            if (this.game.currTetromino[i][j] !== null) {
 
                 var block = new createjs.Shape();
 
                 block.graphics
                     .beginFill('grey')
-                    .drawRect( this.BLOCK_WIDTH * (j + ghostTopLeftCol) + 1, this.BLOCK_HEIGHT * (i + ghostTopLeftRow) + 1, this.BLOCK_WIDTH - 3 , this.BLOCK_HEIGHT - 3 )
+                    .drawRect(this.BLOCK_WIDTH * (j + ghostTopLeftCol) + 1, this.BLOCK_HEIGHT * (i + ghostTopLeftRow) + 1, this.BLOCK_WIDTH - 3 , this.BLOCK_HEIGHT - 3)
                     .endFill();
 
                 this.stage.addChild(block);
             }
         }
     }
-    
 };
 
 RenderEngine.prototype.renderNextBoard = function() {
@@ -236,16 +230,15 @@ RenderEngine.prototype.renderNextBoard = function() {
     var widthOffset = nextBoardMiddleW - nextTetrominoMiddleW;
 
     // render the next board
-    for ( var i = 0, len = this.game.nextTetromino.length; i < len; i++ ) {
-        for ( var j = 0, len2 = this.game.nextTetromino[i].length; j < len2; j++ ) {
-            if ( this.game.nextTetromino[ i ][ j ] ) {
-                this.nextStage.addChild(this.drawBlock( heightOffset + i, widthOffset + j, this.tetrominoColors[ this.game.nextTetromino[ i ][ j ] ], 'white'));
+    for (var i = 0, len = this.game.nextTetromino.length; i < len; i++) {
+        for (var j = 0, len2 = this.game.nextTetromino[i].length; j < len2; j++) {
+            if (this.game.nextTetromino[i][j] !== null) {
+                this.nextStage.addChild(this.drawBlock(heightOffset + i, widthOffset + j, this.tetrominoColors[this.game.nextTetromino[i][j].color], 'white'));
             }
         }
     }
 
     this.nextStage.update();
-
 };
 
 module.exports = RenderEngine;
