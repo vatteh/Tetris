@@ -30,11 +30,10 @@ function Tetris(height, width, testing) {
 		38: 'up',
 		32: 'spacebar'
 	};
-
 }
 
 Tetris.prototype.newRow = function (width) {
-	var row = new Array();
+	var row = [];
 	for (var i = 0; i < width; i++) {
 	   	row[i] = null;
 	}
@@ -43,7 +42,6 @@ Tetris.prototype.newRow = function (width) {
 };
 
 Tetris.prototype.generateBoard = function (height, width) {
-
 	var gameArray = [];
 
 	// create empty height x width board
@@ -71,26 +69,42 @@ Tetris.prototype.setUpKeyEvents = function (startGame) {
 
 Tetris.prototype.randomizeTetrominoOrder = function () {
 	//Randomize array element order in-place. Using Fisher-Yates shuffle algorithm.
-	var shuffleArray = function (aRay) {
-	    for (var i = aRay.length - 1; i > 0; i--) {
+	var shuffleArray = function (tetrominos) {
+	    for (var i = tetrominos.length - 1; i > 0; i--) {
 	        var j = Math.floor(Math.random() * (i + 1));
-	        var temp = aRay[i];
-	        aRay[i] = aRay[j];
-	        aRay[j] = temp;
+	        var temp = tetrominos[i];
+	        tetrominos[i] = tetrominos[j];
+	        tetrominos[j] = temp;
 	    }
 	}
 
 	this.tetrominoOrder = [
-		tetrominos.I, 
-		tetrominos.J, 
-		tetrominos.L, 
-		tetrominos.O, 
-		tetrominos.S, 
-		tetrominos.T, 
-		tetrominos.Z 
-	   ];
+		this.copyTetromino(tetrominos.I), 
+		this.copyTetromino(tetrominos.J), 
+		this.copyTetromino(tetrominos.L),
+		this.copyTetromino(tetrominos.O), 
+		this.copyTetromino(tetrominos.S), 
+		this.copyTetromino(tetrominos.T), 
+		this.copyTetromino(tetrominos.Z), 
+	];
 	
 	shuffleArray(this.tetrominoOrder);
+};
+
+Tetris.prototype.copyTetromino = function (tetromino) {
+	var copy = [];
+
+	for (var i = 0, len = tetromino.length; i < len; i++) {
+		if (!copy[i]) {
+			copy[i] = [];
+		}
+
+		for (var j = 0, len2 = tetromino[i].length; j < len2; j++) {
+			copy[i][j] = tetromino[i][j] === null ? null : {color: tetromino[i][j].color, block: tetromino[i][j].block}
+		}
+	}
+
+	return copy;
 };
 
 // Rotates this.currTetromino 90 degrees clockwise and checks if collisions occur
@@ -224,7 +238,6 @@ Tetris.prototype.addTetromino = function () {
 	if (!this.checkCollisions(this.currTetromino.topLeft.row, this.currTetromino.topLeft.col, this.currTetromino)) {
 		this.gameOver();
 	}
-
 };
 
 Tetris.prototype.clearRowsBasic = function () {
@@ -244,21 +257,14 @@ Tetris.prototype.clearRowsBasic = function () {
 Tetris.prototype.clearRowsAdvance = function () {
 	var lastRowCleared;
 	var rowsCleared = 0;
-	var lineClearIndexes = [];
 	for (var i = 0, len = this.landedGrid.length; i < len; i++) {
-		if (this.landedGrid[i].indexOf(null) === -1)  { // no null's means row is filled
-			lineClearIndexes.push(i);
+		if (this.landedGrid[i].indexOf(null) === -1)  { // no null's means row is filled. Need to replace it with empty row
+			this.renderEngine.renderLineClearAnimation(this.landedGrid[i]); // line render animation will go here
+			this.landedGrid.splice(i, 1, this.newRow(this.width));
 			rowsCleared++;
 			lastRowCleared = i;
 		}
 	}
-
-	// line render animation will go here
-	// this.renderEngine.renderLineClearAnimation(lineClearIndexes);
-
-	lineClearIndexes.forEach(function(element) {
-		this.landedGrid.splice(element, 1, this.newRow(this.width));
-	}.bind(this));
 
 	if (lastRowCleared !== undefined) {
 		this.calculateRowCombo(rowsCleared);
@@ -270,7 +276,6 @@ Tetris.prototype.clearRowsAdvance = function () {
 	}
 
 	this.renderEngine.renderGameBoard();
-
 };
 
 Tetris.prototype.calculateRowCombo = function (rowsCleared) {
