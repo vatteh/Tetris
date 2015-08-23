@@ -1,10 +1,6 @@
-function RenderEngine(game, testing) {
+require('easeljs');
 
-    this.testing = testing;  
-
-    if (testing)
-        return;
-
+function RenderEngine(game) {
     this.stage = new createjs.Stage("gameboard");
 
     this.game = game;
@@ -35,9 +31,9 @@ function RenderEngine(game, testing) {
     this.score = document.getElementById( 'score' );
     this.gameOver = document.getElementById( 'game-over' );
 
-    this.drawLevel( 1 );
-    this.drawLinesCleared( 0 );
-    this.drawScore( 0 );
+    this.drawLevel(1);
+    this.drawLinesCleared(0);
+    this.drawScore(0);
 
     this.ghostContainer = new createjs.Container();
     this.stage.addChild(this.ghostContainer);
@@ -45,32 +41,23 @@ function RenderEngine(game, testing) {
 };
 
 RenderEngine.prototype.drawLevel = function( level ) {
-    if (this.testing)
-        return;
     this.level.innerHTML = "Current Level: " + level;
 };
 
 RenderEngine.prototype.drawLinesCleared = function( linesCleared ) {
-    if (this.testing)
-        return;
     this.linesCleared.innerHTML = "Lines Cleared: " + linesCleared;
 };
 
 RenderEngine.prototype.drawScore = function( score ) {
-    if (this.testing)
-        return;
     this.score.innerHTML = "Score: " + score;
 };
 
 RenderEngine.prototype.drawGameOver = function() {
-    if (this.testing)
-        return;
     this.gameOver.innerHTML = "Game Over";
 };
 
 //draw a single square at (x, y)
-RenderEngine.prototype.drawBlock = function(colorArray, strokeColor) {
-    
+RenderEngine.prototype.drawBlock = function(colorArray, strokeColor) {    
     var block = new createjs.Shape();
 
     // light
@@ -113,11 +100,6 @@ RenderEngine.prototype.drawBlock = function(colorArray, strokeColor) {
 
 // draws the landed board and the current Tetromino
 RenderEngine.prototype.renderGameBoard = function() {
-    if (this.testing)
-        return;
-
-    //this.stage.removeAllChildren();
-
     this.renderGhost();
     this.renderCurrTetromino();
     this.renderLandedGrid();
@@ -130,9 +112,7 @@ RenderEngine.prototype.renderCurrTetromino = function() {
         for (var j = 0, len2 = this.game.currTetromino[i].length; j < len2; j++) {
             if (this.game.currTetromino[i][j] === null) {
                 continue;
-            }
-
-            if (this.game.currTetromino[i][j].block !== null) {
+            } else if (this.game.currTetromino[i][j].block !== null) {
                 this.game.currTetromino[i][j].block.x = this.BLOCK_WIDTH * (this.game.currTetromino.topLeft.col + j);
                 this.game.currTetromino[i][j].block.y = this.BLOCK_HEIGHT * (this.game.currTetromino.topLeft.row + i);
             } else {
@@ -150,11 +130,7 @@ RenderEngine.prototype.renderCurrTetromino = function() {
 RenderEngine.prototype.renderLandedGrid = function(lineIndexArray) {
     for (var i = 0, len = this.game.landedGrid.length; i < len; i++) {
         for (var j = 0, len2 = this.game.landedGrid[i].length; j < len2; j++) {
-            if (this.game.landedGrid[i][j] === null) {
-                continue;
-            } 
-
-            if (this.game.landedGrid[i][j].block !== null) {
+            if (this.game.landedGrid[i][j] && this.game.landedGrid[i][j].block) {
                 this.game.landedGrid[i][j].block.x = this.BLOCK_HEIGHT * j;
                 this.game.landedGrid[i][j].block.y = this.BLOCK_WIDTH * i;
             } 
@@ -174,9 +150,11 @@ RenderEngine.prototype.renderLineClearAnimation = function(filledRow) {
     //this.stage.removeAllChildren();
     // TWEEN.removeAll();
 
-    filledRow.forEach(function(elm) {
-        this.stage.removeChild(elm.block);
-    }.bind(this));
+    for (var i = 0, len = filledRow.length; i < len; i++) {
+        if (filledRow[i].block !== undefined) {
+            this.stage.removeChild(filledRow[i].block);
+        }
+    };
     
     // var that = this;
     // var lineContainers = this.renderLandedGrid(lineIndexArray);
@@ -202,9 +180,6 @@ RenderEngine.prototype.renderLineClearAnimation = function(filledRow) {
 };
 
 RenderEngine.prototype.renderGhost = function() {
-    if (this.testing)
-        return;
-
     this.ghostContainer.removeAllChildren(); 
 
     var ghostTopLeftRow = potentialGhostTopLeftRow = this.game.currTetromino.topLeft.row;
@@ -233,9 +208,6 @@ RenderEngine.prototype.renderGhost = function() {
 };
 
 RenderEngine.prototype.renderNextBoard = function() {
-    if (this.testing)
-        return;
-
     this.nextStage.removeAllChildren();
 
     //calculate the middle of this tetriminto

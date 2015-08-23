@@ -1,19 +1,57 @@
+var Tetris = require('../game');
+
+var height = 16;
+var width = 10;
+var testGame;
+
+function newRowFilled(width, color) {
+    var row = [];
+
+    for (var i = 0; i < width; i++) {
+        row[i] = {color: color};
+    }
+
+    return row;
+};
+
+function translateBitArray(bitArray) {
+    var objArray = [];
+
+    for (var i = 0; i < bitArray.length; i++) {
+        if (objArray[i] === undefined) {
+            objArray = [];
+        }
+
+        for (var j = 0; j < bitArray[i]; j++) {
+            if (bitArray[i][j] === 0) {
+                objArray[i][j] = null;
+            } else {
+                objArray[i][j] = {color: bitArray[i][j]};
+            }
+        }
+    }
+
+    return objArray;
+};
+
+beforeEach(function() {
+    var fixture = '<canvas id="gameboard" width="" height=""></canvas>' +
+        '<canvas id="nextboard" width="" height=""></canvas>' + 
+        '<p id="level"></p>' +
+        '<p id="linesCleared"></p>' + 
+        '<p id="score"></p>' +
+        '<p id="game-over"></p>';
+
+    document.body.insertAdjacentHTML('afterbegin', fixture);
+    testGame = new Tetris(height, width);
+});
 
 describe('basic game board', function() {
-
-    var height = 16;
-    var width = 10;
-	var testGame;
-
-	beforeEach(function() {
-        testGame = new Tetris(height, width, true);
-	});
 
     it('initialize', function() {
     	expect(testGame.height).toEqual(height);
         expect(testGame.width).toEqual(width);
         expect(testGame.intervalID).toEqual(undefined);
-        expect(testGame.testing).toEqual(true);
     });
 
     it('generateBoard()', function() {
@@ -22,7 +60,7 @@ describe('basic game board', function() {
 
         for (var i = 0, len = testGame.landedGrid.length; i < len; i++) {
             for (var j = 0, len2 = testGame.landedGrid[i].length; j < len2; j++) {
-                expect(testGame.landedGrid[i][j]).toEqual(0);
+                expect(testGame.landedGrid[i][j]).toEqual(null);
             }
         }
 
@@ -31,34 +69,17 @@ describe('basic game board', function() {
 
 describe('clear lines: basic', function() {
 
-    var height = 16;
-    var width = 10;
-    var testGame;
-
-    beforeEach(function() {
-        testGame = new Tetris(height, width, true);
-    });
-
     it('clears bottom row when filled', function() {
-        testGame.landedGrid.splice(height-1, 1);
-        var aRay = new Array();
-        for (var i = 0; i < width; i++)
-            aRay[i] = 1;
-        testGame.landedGrid.push(aRay);
-
+        testGame.landedGrid.splice(height-1, 1, newRowFilled(width, 1));
         testGame.clearRowsAdvance();
-
         expect(testGame.landedGrid).toEqual(testGame.generateBoard(height, width));
     });
 
     it('clears bottom multiple rows when filled', function() {
         testGame.landedGrid.splice(height-3, 3);
-        var aRay = new Array();
-        for (var i = 0; i < width; i++)
-            aRay[i] = 1;
-        testGame.landedGrid.push(aRay);
-        testGame.landedGrid.push(aRay);
-        testGame.landedGrid.push(aRay);
+        testGame.landedGrid.push(newRowFilled(width, 1));
+        testGame.landedGrid.push(newRowFilled(width, 1));
+        testGame.landedGrid.push(newRowFilled(width, 1));
 
         testGame.clearRowsAdvance();
 
@@ -66,36 +87,24 @@ describe('clear lines: basic', function() {
     });
 
     it('block falls to correct position when emptied', function() {
-        testGame.landedGrid.splice(height-1, 1);
-        var aRay = new Array();
-        for (var i = 0; i < width; i++)
-            aRay[i] = 1;
-        testGame.landedGrid.push(aRay);
-        testGame.landedGrid[0][0] = 1;
+        testGame.landedGrid.splice(height-1, 1, newRowFilled(width, 1));
+        testGame.landedGrid[0][0] = {color: 1};
 
         testGame.clearRowsAdvance();
 
-        expect(testGame.landedGrid[testGame.height-1][0]).toEqual(1);
-        expect(testGame.landedGrid[0][0]).toEqual(0);
+        expect(testGame.landedGrid[testGame.height-1][0]).toEqual({color: 1});
+        expect(testGame.landedGrid[0][0]).toEqual(null);
     });
 });
 
 describe('clear lines: scenarios', function() {
 
-    var height = 16;
-    var width = 10;
-    var testGame;
-
     // tests will not work if height != 16 && width != 10
     if (height !== 16 || width !== 10)
         return;
 
-    beforeEach(function() {
-        testGame = new Tetris(height, width, true);
-    });
-
     it('clears bottom row', function() {
-        testGame.landedGrid = [
+        testGame.landedGrid = translateBitArray([
             [0,0,0,0,0,0,0,0,0,0],
             [0,0,0,0,0,0,0,0,0,0],
             [0,0,0,0,0,0,0,0,0,0],
@@ -112,11 +121,11 @@ describe('clear lines: scenarios', function() {
             [0,0,0,0,0,0,0,0,0,0],
             [0,0,0,0,0,0,0,0,0,0],
             [1,1,1,1,1,1,1,1,1,1],
-        ];
+        ]);
 
         testGame.clearRowsAdvance();
 
-        expect(testGame.landedGrid).toEqual(
+        expect(testGame.landedGrid).toEqual(translateBitArray(
             [
                 [0,0,0,0,0,0,0,0,0,0],
                 [0,0,0,0,0,0,0,0,0,0],
@@ -135,11 +144,11 @@ describe('clear lines: scenarios', function() {
                 [0,0,0,0,0,0,0,0,0,0],
                 [0,0,0,0,0,0,0,0,0,0],
             ]
-        );
+        ));
     });
 
     it('clears multiple bottom rows', function() {
-        testGame.landedGrid = [
+        testGame.landedGrid = translateBitArray([
             [0,0,0,0,0,0,0,0,0,0],
             [0,0,0,0,0,0,0,0,0,0],
             [0,0,0,0,0,0,0,0,0,0],
@@ -156,11 +165,11 @@ describe('clear lines: scenarios', function() {
             [1,1,1,1,1,1,1,1,1,1],
             [1,1,1,1,1,1,1,1,1,1],
             [1,1,1,1,1,1,1,1,1,1],
-        ];
+        ]);
 
         testGame.clearRowsAdvance();
 
-        expect(testGame.landedGrid).toEqual(
+        expect(testGame.landedGrid).toEqual(translateBitArray(
             [
                 [0,0,0,0,0,0,0,0,0,0],
                 [0,0,0,0,0,0,0,0,0,0],
@@ -179,11 +188,11 @@ describe('clear lines: scenarios', function() {
                 [0,0,0,0,0,0,0,0,0,0],
                 [0,0,0,0,0,0,0,0,0,0],
             ]
-        );
+        ));
     });
 
     it('remaining blocks fall in correct locations - 1', function() {
-        testGame.landedGrid = [
+        testGame.landedGrid = translateBitArray([
             [0,0,0,0,0,0,0,0,0,0],
             [0,0,0,0,0,0,0,0,0,0],
             [0,0,0,0,0,0,0,0,0,0],
@@ -200,11 +209,11 @@ describe('clear lines: scenarios', function() {
             [1,1,1,1,1,1,1,1,1,1],
             [0,0,0,0,0,0,0,0,0,0],
             [1,1,1,1,1,1,1,1,1,1],
-        ];
+        ]);
 
         testGame.clearRowsAdvance();
 
-        expect(testGame.landedGrid).toEqual(
+        expect(testGame.landedGrid).toEqual(translateBitArray(
             [
                 [0,0,0,0,0,0,0,0,0,0],
                 [0,0,0,0,0,0,0,0,0,0],
@@ -223,11 +232,11 @@ describe('clear lines: scenarios', function() {
                 [0,0,0,0,0,0,0,0,0,0],
                 [1,1,1,1,1,0,0,0,0,0],
             ]
-        );
+        ));
     });
 
     it('remaining blocks fall in correct locations - 2', function() {
-        testGame.landedGrid = [
+        testGame.landedGrid = translateBitArray([
             [0,0,0,0,0,0,0,0,0,0],
             [0,0,0,0,0,0,0,0,0,0],
             [0,0,0,0,0,0,0,0,0,0],
@@ -244,11 +253,11 @@ describe('clear lines: scenarios', function() {
             [1,1,1,1,1,1,1,1,1,1],
             [0,0,0,0,0,0,0,0,0,0],
             [1,1,1,1,1,1,1,1,1,1],
-        ];
+        ]);
 
         testGame.clearRowsAdvance();
 
-        expect(testGame.landedGrid).toEqual(
+        expect(testGame.landedGrid).toEqual(translateBitArray(
             [
                 [0,0,0,0,0,0,0,0,0,0],
                 [0,0,0,0,0,0,0,0,0,0],
@@ -267,11 +276,11 @@ describe('clear lines: scenarios', function() {
                 [0,0,0,0,0,0,0,0,0,0],
                 [0,0,0,0,0,0,0,0,0,0],
             ]
-        );
+        ));
     });
 
     it('remaining blocks fall in correct locations - 3', function() {
-        testGame.landedGrid = [
+        testGame.landedGrid = translateBitArray([
             [0,0,0,0,0,0,0,0,0,0],
             [0,0,0,0,0,0,0,0,0,0],
             [0,0,0,0,0,0,0,0,0,0],
@@ -288,11 +297,11 @@ describe('clear lines: scenarios', function() {
             [1,1,1,1,1,1,1,1,1,1],
             [0,0,0,0,0,0,0,0,0,0],
             [1,1,1,1,1,1,1,1,1,1],
-        ];
+        ]);
 
         testGame.clearRowsAdvance();
 
-        expect(testGame.landedGrid).toEqual(
+        expect(testGame.landedGrid).toEqual(translateBitArray(
             [
                 [0,0,0,0,0,0,0,0,0,0],
                 [0,0,0,0,0,0,0,0,0,0],
@@ -311,11 +320,11 @@ describe('clear lines: scenarios', function() {
                 [0,0,0,0,0,0,0,0,0,0],
                 [1,1,1,1,1,1,1,1,1,0],
             ]
-        );
+        ));
     });
 
     it('remaining blocks fall in correct locations - 4', function() {
-        testGame.landedGrid = [
+        testGame.landedGrid = translateBitArray([
             [0,0,0,0,0,0,0,0,0,0],
             [0,0,0,0,0,0,0,0,0,0],
             [0,0,0,0,0,0,0,0,0,0],
@@ -332,11 +341,11 @@ describe('clear lines: scenarios', function() {
             [0,0,0,0,0,0,0,2,2,2],
             [1,1,1,1,1,1,1,1,1,2],
             [1,1,1,1,1,1,1,1,0,0],
-        ];
+        ]);
 
         testGame.clearRowsAdvance();
 
-        expect(testGame.landedGrid).toEqual(
+        expect(testGame.landedGrid).toEqual(translateBitArray(
             [
                 [0,0,0,0,0,0,0,0,0,0],
                 [0,0,0,0,0,0,0,0,0,0],
@@ -355,11 +364,11 @@ describe('clear lines: scenarios', function() {
                 [0,0,0,0,0,0,0,2,2,2],
                 [1,1,1,1,1,1,1,1,0,0],
             ]
-        );
+        ));
     });
     
     it('remaining blocks fall in correct locations - 5', function() {
-        testGame.landedGrid = [
+        testGame.landedGrid = translateBitArray([
             [0,0,0,0,0,0,0,0,0,0],
             [0,0,0,0,0,0,0,0,0,0],
             [0,0,0,0,0,0,0,0,0,0],
@@ -376,11 +385,11 @@ describe('clear lines: scenarios', function() {
             [0,0,0,0,0,0,0,0,0,2],
             [1,1,1,1,1,1,1,2,2,2],
             [1,1,1,1,1,1,1,1,0,0],
-        ];
+        ]);
 
         testGame.clearRowsAdvance();
 
-        expect(testGame.landedGrid).toEqual(
+        expect(testGame.landedGrid).toEqual(translateBitArray(
             [
                 [0,0,0,0,0,0,0,0,0,0],
                 [0,0,0,0,0,0,0,0,0,0],
@@ -399,11 +408,11 @@ describe('clear lines: scenarios', function() {
                 [0,0,0,0,0,0,0,0,0,0],
                 [1,1,1,1,1,1,1,1,0,2],
             ]
-        );
+        ));
     });
 
     it('remaining blocks fall in correct locations - 6', function() {
-        testGame.landedGrid = [
+        testGame.landedGrid = translateBitArray([
             [0,0,0,0,0,0,0,0,0,0],
             [0,0,0,0,0,0,0,0,0,0],
             [0,0,0,0,0,0,0,0,0,0],
@@ -420,11 +429,11 @@ describe('clear lines: scenarios', function() {
             [1,1,1,1,1,1,1,0,0,0],
             [1,1,1,1,1,1,1,1,0,0],
             [1,1,1,1,1,1,1,1,1,1],
-        ];
+        ]);
 
         testGame.clearRowsAdvance();
 
-        expect(testGame.landedGrid).toEqual(
+        expect(testGame.landedGrid).toEqual(translateBitArray(
             [
                 [0,0,0,0,0,0,0,0,0,0],
                 [0,0,0,0,0,0,0,0,0,0],
@@ -443,11 +452,11 @@ describe('clear lines: scenarios', function() {
                 [1,1,1,1,1,1,1,0,0,0],
                 [1,1,1,1,1,1,1,1,0,0],
             ]
-        );
+        ));
     });
 
     it('remaining blocks fall in correct locations - 7', function() {
-        testGame.landedGrid = [
+        testGame.landedGrid = translateBitArray([
             [0,0,0,0,0,0,0,0,0,0],
             [0,0,0,0,0,0,0,0,0,0],
             [0,0,0,0,0,0,0,0,0,0],
@@ -464,11 +473,11 @@ describe('clear lines: scenarios', function() {
             [0,1,1,0,0,1,1,1,0,0],
             [0,1,1,0,0,1,1,1,0,0],
             [0,1,1,0,0,1,1,1,0,0],
-        ];
+        ]);
 
         testGame.clearRowsAdvance();
 
-        expect(testGame.landedGrid).toEqual(
+        expect(testGame.landedGrid).toEqual(translateBitArray(
             [
                 [0,0,0,0,0,0,0,0,0,0],
                 [0,0,0,0,0,0,0,0,0,0],
@@ -487,11 +496,11 @@ describe('clear lines: scenarios', function() {
                 [2,1,1,2,2,1,1,1,0,0],
                 [2,1,1,2,2,1,1,1,0,2],
             ]
-        );
+        ));
     });
 
     it('remaining blocks fall in correct locations - 8', function() {
-        testGame.landedGrid = [
+        testGame.landedGrid = translateBitArray([
             [0,0,0,0,0,0,0,0,0,0],
             [0,0,0,0,0,0,0,0,0,0],
             [0,0,0,0,0,0,0,0,0,0],
@@ -508,11 +517,11 @@ describe('clear lines: scenarios', function() {
             [2,0,0,1,1,1,0,0,1,1],
             [2,2,1,1,1,1,1,1,1,1],
             [1,1,1,0,0,0,1,1,1,1],
-        ];
+        ]);
 
         testGame.clearRowsAdvance();
 
-        expect(testGame.landedGrid).toEqual(
+        expect(testGame.landedGrid).toEqual(translateBitArray(
             [
                 [0,0,0,0,0,0,0,0,0,0],
                 [0,0,0,0,0,0,0,0,0,0],
@@ -531,12 +540,12 @@ describe('clear lines: scenarios', function() {
                 [2,0,0,0,1,1,0,1,1,1],
                 [2,0,0,0,1,1,0,0,1,1],
             ]
-        );
+        ));
     });
 
 
 it('remaining blocks fall in correct locations - 9', function() {
-    testGame.landedGrid = [
+    testGame.landedGrid = translateBitArray([
         [0,0,0,0,0,0,0,0,0,0],
         [0,0,0,0,0,0,0,0,0,0],
         [0,0,0,0,0,0,0,0,0,0],
@@ -553,11 +562,11 @@ it('remaining blocks fall in correct locations - 9', function() {
         [2,2,2,2,2,2,2,2,2,2],
         [3,3,3,3,3,3,3,3,3,3],
         [4,4,4,4,4,4,4,4,4,4],
-    ];
+    ]);
 
     testGame.clearRowsAdvance();
 
-    expect(testGame.landedGrid).toEqual(
+    expect(testGame.landedGrid).toEqual(translateBitArray(
         [
             [0,0,0,0,0,0,0,0,0,0],
             [0,0,0,0,0,0,0,0,0,0],
@@ -576,7 +585,7 @@ it('remaining blocks fall in correct locations - 9', function() {
             [0,1,0,0,0,0,0,0,0,0],
             [0,1,1,1,1,1,1,1,1,1],
         ]
-    );
+    ));
 });
 
 });

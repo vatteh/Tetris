@@ -1,7 +1,7 @@
 var tetrominos = require('./tetrominos');
 var RenderEngine = require('./render');
 
-function Tetris(height, width, testing) {
+function Tetris(height, width, speed) {
 	this.landedGrid = this.generateBoard(height, width);
 	this.height = this.landedGrid.length;
 	this.width = this.landedGrid[0].length;
@@ -12,16 +12,17 @@ function Tetris(height, width, testing) {
 	this.currScore = 0;
 	this.currLevel = 1;
 	this.currLinesCleared = 0;
-	this.renderEngine = new RenderEngine(this, testing);
+	this.renderEngine = new RenderEngine(this);
 	this.randomizeTetrominoOrder();
 	this.addTetromino();
 	this.setUpKeyEvents(true);
-	this.testing = testing;
 	this.renderEngine.renderGameBoard();
-
 	this.intervalID;
-	this.playSpeed = 1000;
-	this.setPlay(this.playSpeed);
+	
+	if (speed) {
+		this.playSpeed = speed;
+		this.setPlay(this.playSpeed);
+	}
 
 	this.keyCodes = {
 		37: 'left',
@@ -41,10 +42,10 @@ Tetris.prototype.newRow = function (width) {
 	return row;
 };
 
+// create empty height x width board
 Tetris.prototype.generateBoard = function (height, width) {
 	var gameArray = [];
 
-	// create empty height x width board
 	for (var i = 0; i < height; i++) {
 		gameArray.push(this.newRow(width));
    	}
@@ -91,6 +92,7 @@ Tetris.prototype.randomizeTetrominoOrder = function () {
 	shuffleArray(this.tetrominoOrder);
 };
 
+// Create a deep copy of the tetromino
 Tetris.prototype.copyTetromino = function (tetromino) {
 	var copy = [];
 
@@ -174,8 +176,7 @@ Tetris.prototype.moveTetromino = function (keyCode, tetromino) {
 		return false;
 	}
 	
-	if (this.checkCollisions(potentialTopLeftRow, potentialTopLeftCol, tetromino)) {
-		// the Tetromino can move to new position 
+	if (this.checkCollisions(potentialTopLeftRow, potentialTopLeftCol, tetromino)) { // the Tetromino can move to new position 
    		tetromino.topLeft.row = potentialTopLeftRow;
    		tetromino.topLeft.col = potentialTopLeftCol;
 
@@ -389,19 +390,13 @@ Tetris.prototype.gameOver = function () {
 };
 
 Tetris.prototype.setPlay = function (speed) {
-	if (this.testing)
-		return;
-
 	clearInterval(this.intervalID);
 	
 	var that = this;
 
 	this.intervalID = window.setInterval( function() {
  		that.moveTetromino('tick', that.currTetromino);
- 	}, speed );
+ 	}, speed);
 };
 
-(function() {
-	var game = new Tetris(16, 10, false);
-})();
-
+module.exports = Tetris;

@@ -6,16 +6,29 @@ module.exports = function(grunt) {
 		browserify: {
 			build: {
 				files: {
-					'build/scripts/app.bundle.js': ['app/lib/game.js', 'app/lib/render.js', 'app/lib/tetrominoRotations.js']
+					'build/scripts/app.bundle.js': ['app/lib/game.js', 'app/lib/render.js', 'app/lib/tetrominoRotations.js', 'app/lib/start.js']
 				}
-			}
+			},
+			dev: {
+                options: {
+                    browserifyOptions: {
+                        debug: true
+                    }
+                }
+            }
 		},
+
+        karma: {
+            unit:{
+                configFile:"karma.conf.js"
+            }
+        },
 
 		copy: {
 			scripts: {
 				src: [
-					'bower_components/easeljs/lib/easeljs-0.8.0.combined.js',
-					'bower_components/tweenjs/src/Tween.js'
+					'bower_components/easeljs/lib/easeljs-0.8.0.min.js',
+					'bower_components/tweenjs/build/tween.min.js'
 				],
 				dest: 'build/scripts/',
 				expand: true,
@@ -69,6 +82,7 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks('grunt-contrib-watch');
 	grunt.loadNpmTasks('grunt-contrib-connect');
 	grunt.loadNpmTasks('grunt-browserify');
+	grunt.loadNpmTasks('grunt-karma');
 
 	grunt.registerTask('build', ['browserify', 'copy']);
 	grunt.registerTask('default', ['build', 'connect', 'watch']);

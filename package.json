@@ -1,19 +1,42 @@
 {
-	"name": "Tetris",
-	"description": "Implementing Tetris using Javascript and Easel.js",
-	"main": "index.html",
-	"author": "Victor Atteh",
-	"licence": "MIT",
-	"repository": {
-	  "type": "git",
-	  "url": "https://github.com/vatteh/Tetris.git"
-	},
-	"devDependencies": {
-		"grunt": "*",
-		"browserify": "*",
-		"grunt-browserify": "*",
-		"grunt-contrib-watch": "*",
-		"grunt-contrib-copy": "*",
-		"grunt-contrib-connect": "*"
-	}  
+  "name": "Tetris",
+  "description": "Implementing Tetris using Javascript and Easel.js",
+  "main": "index.html",
+  "author": "Victor Atteh",
+  "licence": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vatteh/Tetris.git"
+  },
+  "devDependencies": {
+    "browserify": "*",
+    "browserify-shim": "^3.8.10",
+    "grunt": "*",
+    "grunt-browserify": "*",
+    "grunt-contrib-connect": "*",
+    "grunt-contrib-copy": "*",
+    "grunt-contrib-watch": "*",
+    "grunt-karma": "^0.12.0",
+    "jasmine-core": "^2.3.4",
+    "karma": "^0.13.9",
+    "karma-bro": "^0.11.1",
+    "karma-fixture": "^0.2.5",
+    "karma-html2js-preprocessor": "^0.1.0",
+    "karma-jasmine": "^0.3.6",
+    "karma-phantomjs-launcher": "^0.2.1",
+    "phantomjs": "^1.9.18"
+  },
+  "browser": {
+    "easeljs": "./build/scripts/easeljs-0.8.0.min.js",
+    "tweenjs": "./build/scripts/tween.min.js"
+  },
+  "browserify-shim": {
+    "easeljs": "easeljs",
+    "tweenjs": "tweenjs"
+  },
+  "browserify": {
+    "transform": [
+      "browserify-shim"
+    ]
+  }
 }
