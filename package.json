@@ -27,12 +27,12 @@
     "phantomjs": "^1.9.18"
   },
   "browser": {
-    "easeljs": "./build/scripts/easeljs-0.8.0.min.js",
-    "tweenjs": "./build/scripts/tween.min.js"
+    "easeljs": "./build/scripts/easeljs-0.8.1.min.js",
+    "TweenJS": "./build/scripts/tweenjs-0.6.1.min.js"
   },
   "browserify-shim": {
     "easeljs": "easeljs",
-    "tweenjs": "tweenjs"
+    "TweenJS": "TweenJS"
   },
   "browserify": {
     "transform": [

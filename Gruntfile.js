@@ -27,8 +27,8 @@ module.exports = function(grunt) {
 		copy: {
 			scripts: {
 				src: [
-					'bower_components/easeljs/lib/easeljs-0.8.0.min.js',
-					'bower_components/tweenjs/build/tween.min.js'
+					'bower_components/easeljs/lib/easeljs-0.8.1.min.js',
+					'bower_components/TweenJS/lib/tweenjs-0.6.1.min.js'
 				],
 				dest: 'build/scripts/',
 				expand: true,

@@ -1,4 +1,5 @@
 require('easeljs');
+require('TweenJS');
 
 function RenderEngine(game) {
     this.stage = new createjs.Stage("gameboard");
@@ -38,6 +39,7 @@ function RenderEngine(game) {
     this.ghostContainer = new createjs.Container();
     this.stage.addChild(this.ghostContainer);
 
+    this.animate();
 };
 
 RenderEngine.prototype.drawLevel = function( level ) {
@@ -104,7 +106,19 @@ RenderEngine.prototype.renderGameBoard = function() {
     this.renderCurrTetromino();
     this.renderLandedGrid();
 
+    //this.stage.update();
+};
+
+RenderEngine.prototype.handleTick = function() {
     this.stage.update();
+};
+
+RenderEngine.prototype.animate = function() {
+    /*createjs.Ticker.addEventListener("tick", handleTick);*/
+    this.handleTick();
+    if (window.requestAnimationFrame) {
+        requestAnimationFrame(this.animate.bind(this));    
+    }
 };
 
 RenderEngine.prototype.renderCurrTetromino = function() {
@@ -113,8 +127,9 @@ RenderEngine.prototype.renderCurrTetromino = function() {
             if (this.game.currTetromino[i][j] === null) {
                 continue;
             } else if (this.game.currTetromino[i][j].block !== null) {
-                this.game.currTetromino[i][j].block.x = this.BLOCK_WIDTH * (this.game.currTetromino.topLeft.col + j);
-                this.game.currTetromino[i][j].block.y = this.BLOCK_HEIGHT * (this.game.currTetromino.topLeft.row + i);
+                var x = this.BLOCK_WIDTH * (this.game.currTetromino.topLeft.col + j);
+                var y = this.BLOCK_HEIGHT * (this.game.currTetromino.topLeft.row + i);
+                createjs.Tween.get(this.game.currTetromino[i][j].block).to({x: x, y: y}, 100, createjs.Ease.getPowInOut(2));
             } else {
                 var block = this.drawBlock(this.tetrominoColors[this.game.currTetromino[i][j].color], 'white');
                 block.x = this.BLOCK_WIDTH * (this.game.currTetromino.topLeft.col + j);

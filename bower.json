@@ -1,13 +1,13 @@
 {
-	"name": "Tetris",
-	"description": "Implementing Tetris using Javascript and Easel.js",
-	"main": "index.html",
-	"authors": [
-		"Victor Atteh <victoratteh@gmail.com>"
-	],
-	"licence": "MIT",
-	"dependencies": {
-		"easeljs": "*",
-		"tweenjs": "*"
-	}  
+  "name": "Tetris",
+  "description": "Implementing Tetris using Javascript and Easel.js",
+  "main": "index.html",
+  "authors": [
+    "Victor Atteh <victoratteh@gmail.com>"
+  ],
+  "licence": "MIT",
+  "dependencies": {
+    "easeljs": "~0.8.1",
+    "TweenJS": "~0.6.1"
+  }
 }
