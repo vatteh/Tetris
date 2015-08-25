@@ -152,7 +152,7 @@ Tetris.prototype.moveTetromino = function (keyCode, tetromino) {
 	} else if (keyCode === 'tick') { 
 		potentialTopLeftRow = tetromino.topLeft.row + 1;
 		potentialTopLeftCol = tetromino.topLeft.col;
-	} else if (keyCode === 'spacebar') { 
+	} else if (keyCode === 'spacebar' || keyCode === 'clumpdrop') { 
 		potentialTopLeftRow = tetromino.topLeft.row;
 		potentialTopLeftCol = tetromino.topLeft.col;
 
@@ -162,16 +162,10 @@ Tetris.prototype.moveTetromino = function (keyCode, tetromino) {
 			rowsDropped++;
 		}
 
-		this.currScore += rowsDropped * 2;
-		this.renderEngine.drawScore(this.currScore);
-	} else if (keyCode === 'clumpdrop') {
-		potentialTopLeftRow = tetromino.topLeft.row;
-		potentialTopLeftCol = tetromino.topLeft.col;
-
-		while (this.checkCollisions(++potentialTopLeftRow, potentialTopLeftCol, tetromino)) {
-			tetromino.topLeft.row = potentialTopLeftRow;
+		if (keyCode === 'spacebar') {
+			this.currScore += rowsDropped * 2;
+			this.renderEngine.drawScore(this.currScore);
 		}
-
 	} else {
 		return false;
 	}

@@ -113,8 +113,12 @@ RenderEngine.prototype.handleTick = function() {
     this.stage.update();
 };
 
+RenderEngine.prototype.animationSpeed = function() {
+    return this.game.playSpeed / 2;
+};
+
 RenderEngine.prototype.animate = function() {
-    /*createjs.Ticker.addEventListener("tick", handleTick);*/
+    // createjs.Ticker.addEventListener("tick", this.handleTick.bind(this));
     this.handleTick();
     if (window.requestAnimationFrame) {
         requestAnimationFrame(this.animate.bind(this));    
@@ -127,13 +131,13 @@ RenderEngine.prototype.renderCurrTetromino = function() {
             if (this.game.currTetromino[i][j] === null) {
                 continue;
             } else if (this.game.currTetromino[i][j].block !== null) {
-                var x = this.BLOCK_WIDTH * (this.game.currTetromino.topLeft.col + j);
-                var y = this.BLOCK_HEIGHT * (this.game.currTetromino.topLeft.row + i);
-                createjs.Tween.get(this.game.currTetromino[i][j].block).to({x: x, y: y}, 100, createjs.Ease.getPowInOut(2));
+                var newX = this.BLOCK_WIDTH * (this.game.currTetromino.topLeft.col + j);
+                var newY = this.BLOCK_HEIGHT * (this.game.currTetromino.topLeft.row + i);
+                createjs.Tween.get(this.game.currTetromino[i][j].block, {override: true}).to({x: newX, y: newY}, this.animationSpeed(), createjs.Ease.quintOut); // bounceOut, cubicOut, quadOut, quartOut, quintOut, getElasticOut(2,5)
             } else {
                 var block = this.drawBlock(this.tetrominoColors[this.game.currTetromino[i][j].color], 'white');
                 block.x = this.BLOCK_WIDTH * (this.game.currTetromino.topLeft.col + j);
-                block.y = this.BLOCK_HEIGHT * (this.game.currTetromino.topLeft.row + i);
+                block.y = this.BLOCK_HEIGHT * (this.game.currTetromino.topLeft.row + i); 
 
                 this.game.currTetromino[i][j].block = block;
                 this.stage.addChild(block);
