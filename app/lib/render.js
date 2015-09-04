@@ -171,7 +171,11 @@ RenderEngine.prototype.renderLineClearAnimation = function(filledRow) {
 
     for (var i = 0, len = filledRow.length; i < len; i++) {
         if (filledRow[i].block !== undefined) {
-            this.stage.removeChild(filledRow[i].block);
+            //this.stage.removeChild(filledRow[i].block);
+            var stage = this.stage;
+            createjs.Tween.get(filledRow[i].block, {override: true}).to({scaleX: 0.1, scaleY: 0.1}, this.animationSpeed()/2, createjs.Ease.backIn).call(function() {
+                stage.removeChild(this);
+            }); 
         }
     };
     

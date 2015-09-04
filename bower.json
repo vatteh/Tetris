@@ -7,7 +7,7 @@
   ],
   "licence": "MIT",
   "dependencies": {
-    "easeljs": "~0.8.1",
-    "TweenJS": "~0.6.1"
+    "TweenJS": "~0.6.1",
+    "easeljs": "~0.8.1"
   }
 }

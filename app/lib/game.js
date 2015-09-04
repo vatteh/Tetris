@@ -240,8 +240,7 @@ Tetris.prototype.clearRowsBasic = function () {
 
 	for (var i = 0, len = this.landedGrid.length; i < len; i++) {
 		if (this.landedGrid[i].indexOf(null) === -1)  { // no null's means row is filled
-			this.landedGrid.splice(i, 1);
-			this.landedGrid.unshift(this.newRow(this.width));
+			this.landedGrid.splice(i, 1, this.newRow(this.width));
 			rowsCleared++;
 		}
 	}
