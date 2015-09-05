@@ -1,5 +1,6 @@
 require('easeljs');
 require('TweenJS');
+require('bluebird');
 
 function RenderEngine(game) {
     this.stage = new createjs.Stage("gameboard");
@@ -102,11 +103,12 @@ RenderEngine.prototype.drawBlock = function(colorArray, strokeColor) {
 
 // draws the landed board and the current Tetromino
 RenderEngine.prototype.renderGameBoard = function() {
+    var that = this;
     this.renderGhost();
-    this.renderCurrTetromino();
-    this.renderLandedGrid();
+    return this.renderCurrTetromino().then(function() {
+        return that.renderLandedGrid();
+    });
 
-    //this.stage.update();
 };
 
 RenderEngine.prototype.handleTick = function() {
@@ -125,25 +127,39 @@ RenderEngine.prototype.animate = function() {
     }
 };
 
-RenderEngine.prototype.renderCurrTetromino = function() {
-    for (var i = 0, len = this.game.currTetromino.length; i < len; i++) {
-        for (var j = 0, len2 = this.game.currTetromino[i].length; j < len2; j++) {
-            if (this.game.currTetromino[i][j] === null) {
-                continue;
-            } else if (this.game.currTetromino[i][j].block !== null) {
-                var newX = this.BLOCK_WIDTH * (this.game.currTetromino.topLeft.col + j);
-                var newY = this.BLOCK_HEIGHT * (this.game.currTetromino.topLeft.row + i);
-                createjs.Tween.get(this.game.currTetromino[i][j].block, {override: true}).to({x: newX, y: newY}, this.animationSpeed(), createjs.Ease.quintOut); // bounceOut, cubicOut, quadOut, quartOut, quintOut, getElasticOut(2,5)
-            } else {
-                var block = this.drawBlock(this.tetrominoColors[this.game.currTetromino[i][j].color], 'white');
-                block.x = this.BLOCK_WIDTH * (this.game.currTetromino.topLeft.col + j);
-                block.y = this.BLOCK_HEIGHT * (this.game.currTetromino.topLeft.row + i); 
+RenderEngine.prototype.renderCurrTetromino = function(keyCode) {
+    var that = this;
+    var animationSpeed = keyCode === 'spacebar' ? this.animationSpeed()/3 : this.animationSpeed();
+    return new Promise(function(resolve, reject) {
+        var blocksAnimating = 0;
+        var blocksAnimated = 0;
+        for (var i = 0, len = that.game.currTetromino.length; i < len; i++) {
+            for (var j = 0, len2 = that.game.currTetromino[i].length; j < len2; j++) {
+                if (that.game.currTetromino[i][j] === null) {
+                    continue;
+                } else if (that.game.currTetromino[i][j].block !== null) {
+                    blocksAnimating++;
+                    var newX = that.BLOCK_WIDTH * (that.game.currTetromino.topLeft.col + j);
+                    var newY = that.BLOCK_HEIGHT * (that.game.currTetromino.topLeft.row + i);
+                    createjs.Tween.get(that.game.currTetromino[i][j].block, {override: true})
+                        .to({x: newX, y: newY}, animationSpeed, createjs.Ease.quintOut)
+                        .call(function() {
+                            blocksAnimated++;
+                            if (blocksAnimated === blocksAnimating) {
+                                resolve();
+                            }
+                        }); 
+                } else {
+                    var block = that.drawBlock(that.tetrominoColors[that.game.currTetromino[i][j].color], 'white');
+                    block.x = that.BLOCK_WIDTH * (that.game.currTetromino.topLeft.col + j);
+                    block.y = that.BLOCK_HEIGHT * (that.game.currTetromino.topLeft.row + i); 
 
-                this.game.currTetromino[i][j].block = block;
-                this.stage.addChild(block);
+                    that.game.currTetromino[i][j].block = block;
+                    that.stage.addChild(block);
+                }
             }
         }
-    }
+    });
 };
 
 RenderEngine.prototype.renderLandedGrid = function(lineIndexArray) {
@@ -153,53 +169,35 @@ RenderEngine.prototype.renderLandedGrid = function(lineIndexArray) {
                 this.game.landedGrid[i][j].block.x = this.BLOCK_HEIGHT * j;
                 this.game.landedGrid[i][j].block.y = this.BLOCK_WIDTH * i;
             } 
-
-            // else {
-            //     var block = this.drawBlock(this.tetrominoColors[this.game.landedGrid[i][j].color], 'black');
-            //     block.x = this.BLOCK_HEIGHT * j;
-            //     block.y = this.BLOCK_WIDTH * i;
-            //     this.game.landedGrid[i][j].block = block;
-            //     this.stage.addChild(block);
-            // }
         }
     }
+
+    return Promise.resolve();
 };
 
-RenderEngine.prototype.renderLineClearAnimation = function(filledRow) {
-    //this.stage.removeAllChildren();
-    // TWEEN.removeAll();
+RenderEngine.prototype.renderLineClearAnimation = function(filledRow) { 
+    var that = this;
+    return new Promise(function(resolve, reject) {
+        var blocksRemoved = 0;
+        var blocksRemoving = 0;
+        for (var i = 0, len = filledRow.length; i < len; i++) {
+            if (filledRow[i].block === undefined) {
+                reject();
+                // continue;
+            } 
 
-    for (var i = 0, len = filledRow.length; i < len; i++) {
-        if (filledRow[i].block !== undefined) {
-            //this.stage.removeChild(filledRow[i].block);
-            var stage = this.stage;
-            createjs.Tween.get(filledRow[i].block, {override: true}).to({scaleX: 0.1, scaleY: 0.1}, this.animationSpeed()/2, createjs.Ease.backIn).call(function() {
+            var stage = that.stage;
+            blocksRemoving++;
+            
+            createjs.Tween.get(filledRow[i].block, {override: false}).to({scaleX: 0.1, scaleY: 0.1}, that.animationSpeed()/2, createjs.Ease.backIn).call(function() {
                 stage.removeChild(this);
+                blocksRemoved++;
+                if (blocksRemoved === blocksRemoving) {
+                    resolve();
+                }
             }); 
-        }
-    };
-    
-    // var that = this;
-    // var lineContainers = this.renderLandedGrid(lineIndexArray);
-    // lineContainers.forEach(function(element) { 
-
-    //     createjs.Tween.get(element)
-    //         .to({alpha: 0}, 300)
-
-
-    //     createjs.Ticker.setFPS(60);
-    //     createjs.Ticker.addEventListener("tick", that.stage);
-
-    //     var tween = new TWEEN.Tween(element)
-    //         .to({ alpha: 0 }, 300)
-    //         .start();
-
-    //     animate();
-    //     function animate() {
-    //         requestAnimationFrame(animate);  
-    //         TWEEN.update();
-    //     }
-    // });
+        };
+    });
 };
 
 RenderEngine.prototype.renderGhost = function() {

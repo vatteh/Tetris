@@ -8,6 +8,7 @@
   "licence": "MIT",
   "dependencies": {
     "TweenJS": "~0.6.1",
+    "bluebird": "~2.9.34",
     "easeljs": "~0.8.1"
   }
 }

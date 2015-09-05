@@ -28,7 +28,8 @@ module.exports = function(grunt) {
 			scripts: {
 				src: [
 					'bower_components/easeljs/lib/easeljs-0.8.1.min.js',
-					'bower_components/TweenJS/lib/tweenjs-0.6.1.min.js'
+					'bower_components/TweenJS/lib/tweenjs-0.6.1.min.js',
+					'bower_components/bluebird/js/browser/bluebird.min.js'
 				],
 				dest: 'build/scripts/',
 				expand: true,
@@ -84,7 +85,7 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks('grunt-browserify');
 	grunt.loadNpmTasks('grunt-karma');
 
-	grunt.registerTask('build', ['browserify', 'copy']);
+	grunt.registerTask('build', ['copy', 'browserify']);
 	grunt.registerTask('default', ['build', 'connect', 'watch']);
 
 };

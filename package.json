@@ -28,11 +28,13 @@
   },
   "browser": {
     "easeljs": "./build/scripts/easeljs-0.8.1.min.js",
-    "TweenJS": "./build/scripts/tweenjs-0.6.1.min.js"
+    "TweenJS": "./build/scripts/tweenjs-0.6.1.min.js",
+    "bluebird": "./build/scripts/bluebird.min.js"
   },
   "browserify-shim": {
     "easeljs": "easeljs",
-    "TweenJS": "TweenJS"
+    "TweenJS": "TweenJS",
+    "bluebird": "bluebird"
   },
   "browserify": {
     "transform": [
