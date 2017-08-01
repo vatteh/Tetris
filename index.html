@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-      <meta http-equiv="Content-type" content="text/html; charset=utf-8">      
+      <meta http-equiv="Content-type" content="text/html; charset=utf-8">
       <title>Tetris</title>
       <link rel="stylesheet" href="game.css">
       <link rel="shortcut icon" href="images/favicon.ico" type="image/x-icon">
@@ -9,7 +9,7 @@
   </head>
   <body>
     <div class ="container group">
-      
+
       <canvas id="gameboard" width="" height="">
         <p>Sorry :( This game is currently not supported in your browser.</p>
       </canvas>
@@ -23,9 +23,9 @@
           <p id="score"></p>
         </div>
         <h1 id='game-title'>Tetris</h1>
-        <p id='game-over'></p>  
+        <p id='game-over'></p>
       </div>
-    
+
     </div>
     <script src="tetrominoRotations.js"></script>
     <script src="game.js"></script>
@@ -33,8 +33,8 @@
     </script>
 
     <script type="text/javascript">
-        var game = new Tetris(16, 10, false);
-    </script>
+    var game = new Tetris(16, 10);
+</script>
 
   </body>
 </html>

@@ -1,13 +1,13 @@
 body {
-  margin:0px;
-  padding:0px;
-  text-align:center;
-  background-color: #555; 
+  margin: 0px;
+  padding: 0px;
+  text-align: center;
+  background-color: #555;
   color: white;
 }
 
 h1#game-title {
-   font-size: 56px;
+  font-size: 56px;
 }
 
 p#game-over {
@@ -16,12 +16,12 @@ p#game-over {
 }
 
 .container {
-	width: 500px;
-	margin: 30px auto;
+  width: 500px;
+  margin: 30px auto;
 }
 
 div.dashboard {
-	float: right;
+  float: right;
 }
 
 canvas#gameboard {
@@ -31,8 +31,8 @@ canvas#gameboard {
 }
 
 canvas#nextboard {
-	border: 3px solid black;
-	background-color: #bbb;	
+  border: 3px solid black;
+  background-color: #bbb;
 }
 
 .group:after {
