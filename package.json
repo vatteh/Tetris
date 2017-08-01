@@ -2,7 +2,6 @@
   "name": "tetris",
   "version": "1.0.0",
   "description": "learning canvas with javascript",
-  "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
