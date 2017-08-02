@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "learning canvas with javascript",
   "scripts": {
-    "start": "node server.js"
+    "start": "node js/server.js"
   },
   "repository": {
     "type": "git",
