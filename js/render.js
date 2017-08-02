@@ -49,7 +49,10 @@ RenderEngine.prototype.drawScore = function(score) {
 };
 
 RenderEngine.prototype.drawGameOver = function() {
-  this.gameOver.innerHTML = 'Game Over';
+  this.gameOver.innerHTML = '<p>Game Over</p><button id="play-again">Play Again</button>';
+  document.getElementById('play-again').addEventListener('click', function() {
+    window.location.reload();
+  });
 };
 
 //draw a single square at (x, y)
