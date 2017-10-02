@@ -1,2 +1,6 @@
 node_modules/*
 .DS_Store
+
+# production
+/build
+/dist/bundle.js

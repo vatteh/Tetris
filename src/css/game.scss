@@ -16,7 +16,7 @@ p#game-over {
 }
 
 #play-again {
-  padding: .5rem 1rem;
+  padding: 0.5rem 1rem;
   font-size: 1rem;
   border-radius: 0;
 }
@@ -42,7 +42,7 @@ canvas#nextboard {
 }
 
 .group:after {
-  content: "";
+  content: '';
   display: table;
   clear: both;
 }
