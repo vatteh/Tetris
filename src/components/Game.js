@@ -21,6 +21,7 @@ class Game extends Component {
     this.nextTetromino = null;
     this.tetrominoOrder = [];
     this.rotationIndex = 0;
+    this.idIncrement = 0;
     this.randomizeTetrominoOrder();
     this.addTetromino();
     this.setUpKeyEvents(true);
@@ -64,6 +65,7 @@ class Game extends Component {
   componentDidMount() {
     this.renderEngine = new RenderEngine(this);
     this.renderEngine.render();
+    this.renderEngine.renderNextBoard();
     this.setPlay(this.playSpeed);
   }
 
@@ -123,6 +125,7 @@ class Game extends Component {
     }
 
     potentialTetromino.topLeft = this.currTetromino.topLeft;
+    potentialTetromino.id = this.currTetromino.id;
 
     if (this.checkCollisions(potentialTetromino.topLeft.row, potentialTetromino.topLeft.col, potentialTetromino)) {
       this.currTetromino = potentialTetromino;
@@ -232,6 +235,7 @@ class Game extends Component {
 
   addTetromino() {
     this.currTetromino = this.tetrominoOrder.shift();
+    this.currTetromino.id = this.idIncrement++;
 
     if (this.tetrominoOrder.length === 0) {
       this.randomizeTetrominoOrder();

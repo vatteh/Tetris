@@ -4,19 +4,19 @@ class RenderEngine {
   constructor(game) {
     this.game = game;
     this.BLOCK_WIDTH = 30;
-    this.BLOCK_HEIGHT = 30;
     this.BOARD_WIDTH = this.BLOCK_WIDTH * this.game.width;
-    this.BOARD_HEIGHT = this.BLOCK_HEIGHT * this.game.height;
+    this.BOARD_HEIGHT = this.BLOCK_WIDTH * this.game.height;
     this.stage = new createjs.Stage('gameboard');
     this.stage.canvas.width = this.BOARD_WIDTH;
     this.stage.canvas.height = this.BOARD_HEIGHT;
 
     this.NEXT_BOARD_WIDTH = this.BLOCK_WIDTH * 5;
-    this.NEXT_BOARD_HEIGHT = this.BLOCK_HEIGHT * 5;
+    this.NEXT_BOARD_HEIGHT = this.BLOCK_WIDTH * 5;
     this.nextStage = new createjs.Stage('nextboard');
     this.nextStage.canvas.width = this.NEXT_BOARD_WIDTH;
     this.nextStage.canvas.height = this.NEXT_BOARD_HEIGHT;
 
+    this.currTetrominoId = -1;
     this.tetrominoColors = [
       ['', '', ''],
       ['rgb(0,201,255)', 'rgb(56,255,255)', 'rgb(0,224,255)', 'rgb(100, 240, 253)'], // cyan
@@ -32,57 +32,51 @@ class RenderEngine {
   // draw a single square at (x, y)
   drawBlock(i, j, colorArray, stage, strokeStyle) {
     // light
-    const light = new createjs.Shape();
-    light.graphics
+    const block = new createjs.Shape();
+    block.graphics
       .beginFill(colorArray[1])
-      .drawRect(this.BLOCK_WIDTH * j, this.BLOCK_HEIGHT * i, this.BLOCK_WIDTH - 1, this.BLOCK_HEIGHT - 1);
-    stage.addChild(light);
+      .drawRect(this.BLOCK_WIDTH * j, this.BLOCK_WIDTH * i, this.BLOCK_WIDTH - 1, this.BLOCK_WIDTH - 1);
 
     // dark
-    const dark = new createjs.Shape();
-    dark.graphics
+    block.graphics
       .setStrokeStyle(1)
       .beginFill(colorArray[0])
-      .moveTo(this.BLOCK_WIDTH * j, this.BLOCK_HEIGHT * i)
-      .lineTo(this.BLOCK_WIDTH * j, this.BLOCK_HEIGHT * i + this.BLOCK_HEIGHT - 1)
-      .lineTo(this.BLOCK_WIDTH * j + this.BLOCK_WIDTH - 1, this.BLOCK_HEIGHT * i + this.BLOCK_HEIGHT - 1)
+      .moveTo(this.BLOCK_WIDTH * j, this.BLOCK_WIDTH * i)
+      .lineTo(this.BLOCK_WIDTH * j, this.BLOCK_WIDTH * i + this.BLOCK_WIDTH - 1)
+      .lineTo(this.BLOCK_WIDTH * j + this.BLOCK_WIDTH - 1, this.BLOCK_WIDTH * i + this.BLOCK_WIDTH - 1)
       .endFill();
-    stage.addChild(dark);
 
     // base
     const bevelThickness = this.BLOCK_WIDTH / 6;
-    const base = new createjs.Shape();
-    base.graphics
+    block.graphics
       .beginFill(colorArray[2])
       .drawRect(
         this.BLOCK_WIDTH * j + bevelThickness,
-        this.BLOCK_HEIGHT * i + bevelThickness,
+        this.BLOCK_WIDTH * i + bevelThickness,
         this.BLOCK_WIDTH - 1 - bevelThickness * 2,
-        this.BLOCK_HEIGHT - 1 - bevelThickness * 2,
+        this.BLOCK_WIDTH - 1 - bevelThickness * 2,
       );
-    stage.addChild(base);
 
     // highlight
     const highlightThickness = bevelThickness / 2;
-    const highlight = new createjs.Shape();
-    highlight.graphics
+    block.graphics
       .setStrokeStyle(0.5)
       .beginFill(colorArray[3])
-      .moveTo(this.BLOCK_WIDTH * j + bevelThickness, this.BLOCK_HEIGHT * i + bevelThickness)
+      .moveTo(this.BLOCK_WIDTH * j + bevelThickness, this.BLOCK_WIDTH * i + bevelThickness)
       .lineTo(
         this.BLOCK_WIDTH * j + bevelThickness,
-        this.BLOCK_HEIGHT * i + bevelThickness + (this.BLOCK_HEIGHT - bevelThickness * 2),
+        this.BLOCK_WIDTH * i + bevelThickness + (this.BLOCK_WIDTH - bevelThickness * 2),
       )
       .lineTo(
         this.BLOCK_WIDTH * j + bevelThickness + (this.BLOCK_WIDTH - bevelThickness * 2),
-        this.BLOCK_HEIGHT * i + bevelThickness + (this.BLOCK_HEIGHT - bevelThickness * 2),
+        this.BLOCK_WIDTH * i + bevelThickness + (this.BLOCK_WIDTH - bevelThickness * 2),
       )
       .lineTo(
         this.BLOCK_WIDTH * j + bevelThickness + highlightThickness,
-        this.BLOCK_HEIGHT * i + bevelThickness + (this.BLOCK_HEIGHT - bevelThickness * 2) - highlightThickness,
+        this.BLOCK_WIDTH * i + bevelThickness + (this.BLOCK_WIDTH - bevelThickness * 2) - highlightThickness,
       )
       .endFill();
-    stage.addChild(highlight);
+    stage.addChild(block);
   }
 
   renderGhost() {
@@ -109,10 +103,21 @@ class RenderEngine {
             .beginFill('grey')
             .drawRect(
               this.BLOCK_WIDTH * (j + ghostTopLeftCol) + 1,
-              this.BLOCK_HEIGHT * (i + ghostTopLeftRow) + 1,
+              this.BLOCK_WIDTH * (i + ghostTopLeftRow) + 1,
               this.BLOCK_WIDTH - 3,
-              this.BLOCK_HEIGHT - 3,
+              this.BLOCK_WIDTH - 3,
             );
+          this.stage.addChild(block);
+        }
+      }
+    }
+  }
+
+  renderLandedGrid() {
+    for (let i = 0; i < this.game.landedGrid.length; i++) {
+      for (let j = 0; j < this.game.landedGrid[0].length; j++) {
+        if (this.game.landedGrid[i][j]) {
+          this.drawBlock(i, j, this.tetrominoColors[this.game.landedGrid[i][j]], this.stage, 'black');
         }
       }
     }
@@ -124,7 +129,7 @@ class RenderEngine {
     const nextTetrominoMiddleH = this.game.nextTetromino.length / 2;
     const nextTetrominoMiddleW = this.game.nextTetromino[0].length / 2;
 
-    const nextBoardMiddleH = this.NEXT_BOARD_HEIGHT / this.BLOCK_HEIGHT / 2;
+    const nextBoardMiddleH = this.NEXT_BOARD_HEIGHT / this.BLOCK_WIDTH / 2;
     const nextBoardMiddleW = this.NEXT_BOARD_WIDTH / this.BLOCK_WIDTH / 2;
 
     const heightOffset = nextBoardMiddleH - nextTetrominoMiddleH;
@@ -151,17 +156,16 @@ class RenderEngine {
   // draws the landed board and the current Tetromino
   render() {
     this.stage.removeAllChildren();
+    this.renderLandedGrid();
     this.renderGhost();
-    // render the landed grid
-    for (let i = 0; i < this.game.landedGrid.length; i++) {
-      for (let j = 0; j < this.game.landedGrid[0].length; j++) {
-        if (this.game.landedGrid[i][j]) {
-          this.drawBlock(i, j, this.tetrominoColors[this.game.landedGrid[i][j]], this.stage, 'black');
-        }
-      }
-    }
 
     // render the current Tetromino
+    // this.stage.removeChild(this.currTetrominoContainer);
+    this.currTetrominoContainer = new createjs.Container();
+    this.currTetrominoContainer.regX = this.game.currTetromino.topLeft.col * this.BLOCK_WIDTH;
+    this.currTetrominoContainer.regY = this.game.currTetromino.topLeft.row * this.BLOCK_WIDTH;
+    this.currTetrominoId = this.game.currTetromino.id;
+
     for (let i = 0; i < this.game.currTetromino.length; i++) {
       for (let j = 0; j < this.game.currTetromino[0].length; j++) {
         if (this.game.currTetromino[i][j]) {
@@ -169,13 +173,16 @@ class RenderEngine {
             this.game.currTetromino.topLeft.row + i,
             this.game.currTetromino.topLeft.col + j,
             this.tetrominoColors[this.game.currTetromino[i][j]],
-            this.stage,
+            this.currTetrominoContainer,
             'white',
           );
         }
       }
     }
 
+    this.stage.addChild(this.currTetrominoContainer);
+    this.currTetrominoContainer.x = this.game.currTetromino.topLeft.col * this.BLOCK_WIDTH;
+    this.currTetrominoContainer.y = this.game.currTetromino.topLeft.row * this.BLOCK_WIDTH;
     this.stage.update();
   }
 }
