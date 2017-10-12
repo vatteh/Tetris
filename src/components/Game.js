@@ -124,7 +124,16 @@ class Game extends Component {
       potentialTetromino = this.currTetromino.tetrominoRotations[0];
     }
 
-    potentialTetromino.topLeft = this.currTetromino.topLeft;
+    const potentialTetrominoMiddlePoint = {
+      row: this.currTetromino.topLeft.row + this.currTetromino.middle.row,
+      col: this.currTetromino.topLeft.col + this.currTetromino.middle.col,
+    };
+
+    potentialTetromino.topLeft = {
+      row: potentialTetrominoMiddlePoint.row - potentialTetromino.middle.row,
+      col: potentialTetrominoMiddlePoint.col - potentialTetromino.middle.col,
+    };
+
     potentialTetromino.id = this.currTetromino.id;
 
     if (this.checkCollisions(potentialTetromino.topLeft.row, potentialTetromino.topLeft.col, potentialTetromino)) {

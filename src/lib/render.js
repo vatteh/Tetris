@@ -27,10 +27,18 @@ class RenderEngine {
       ['rgb(127,63,152)', 'rgb(235,184,255)', 'rgb(201,115,255)', 'rgb(213, 148, 252)'], // purple
       ['rgb(190,30,45)', 'rgb(255,148,150)', 'rgb(255,36,55)', 'rgb(254, 102, 115)'], // red
     ]; // dark, light, base
+
+    this.landedBoardContainer = new createjs.Container();
+    this.ghostContainer = new createjs.Container();
+    this.currTetrominoContainer = new createjs.Container();
+
+    this.stage.addChild(this.currTetrominoContainer);
+    this.stage.addChild(this.ghostContainer);
+    this.stage.addChild(this.landedBoardContainer);
   }
 
   // draw a single square at (x, y)
-  drawBlock(i, j, colorArray, stage, strokeStyle) {
+  drawBlock(i, j, colorArray, strokeStyle) {
     // light
     const block = new createjs.Shape();
     block.graphics
@@ -76,10 +84,21 @@ class RenderEngine {
         this.BLOCK_WIDTH * i + bevelThickness + (this.BLOCK_WIDTH - bevelThickness * 2) - highlightThickness,
       )
       .endFill();
-    stage.addChild(block);
+
+    return block;
+  }
+
+  drawGhostBlock(i, j) {
+    const block = new createjs.Shape();
+    block.graphics
+      .beginFill('grey')
+      .drawRect(this.BLOCK_WIDTH * j + 1, this.BLOCK_WIDTH * i + 1, this.BLOCK_WIDTH - 3, this.BLOCK_WIDTH - 3);
+
+    return block;
   }
 
   renderGhost() {
+    this.ghostContainer.removeAllChildren();
     let potentialGhostTopLeftRow = this.game.currTetromino.topLeft.row;
     let ghostTopLeftRow = this.game.currTetromino.topLeft.row;
     const ghostTopLeftCol = this.game.currTetromino.topLeft.col;
@@ -98,26 +117,20 @@ class RenderEngine {
     for (let i = 0; i < this.game.currTetromino.length; i++) {
       for (let j = 0; j < this.game.currTetromino[0].length; j++) {
         if (this.game.currTetromino[i][j]) {
-          const block = new createjs.Shape();
-          block.graphics
-            .beginFill('grey')
-            .drawRect(
-              this.BLOCK_WIDTH * (j + ghostTopLeftCol) + 1,
-              this.BLOCK_WIDTH * (i + ghostTopLeftRow) + 1,
-              this.BLOCK_WIDTH - 3,
-              this.BLOCK_WIDTH - 3,
-            );
-          this.stage.addChild(block);
+          const block = this.drawGhostBlock(i + ghostTopLeftRow, j + ghostTopLeftCol);
+          this.ghostContainer.addChild(block);
         }
       }
     }
   }
 
   renderLandedGrid() {
+    this.landedBoardContainer.removeAllChildren();
     for (let i = 0; i < this.game.landedGrid.length; i++) {
       for (let j = 0; j < this.game.landedGrid[0].length; j++) {
         if (this.game.landedGrid[i][j]) {
-          this.drawBlock(i, j, this.tetrominoColors[this.game.landedGrid[i][j]], this.stage, 'black');
+          const block = this.drawBlock(i, j, this.tetrominoColors[this.game.landedGrid[i][j]], 'black');
+          this.landedBoardContainer.addChild(block);
         }
       }
     }
@@ -139,13 +152,13 @@ class RenderEngine {
     for (let i = 0; i < this.game.nextTetromino.length; i++) {
       for (let j = 0; j < this.game.nextTetromino[0].length; j++) {
         if (this.game.nextTetromino[i][j]) {
-          this.drawBlock(
+          const block = this.drawBlock(
             heightOffset + i,
             widthOffset + j,
             this.tetrominoColors[this.game.nextTetromino[i][j]],
-            this.nextStage,
             'white',
           );
+          this.nextStage.addChild(block);
         }
       }
     }
@@ -155,32 +168,33 @@ class RenderEngine {
 
   // draws the landed board and the current Tetromino
   render() {
-    this.stage.removeAllChildren();
     this.renderLandedGrid();
     this.renderGhost();
 
     // render the current Tetromino
-    // this.stage.removeChild(this.currTetrominoContainer);
-    this.currTetrominoContainer = new createjs.Container();
-    this.currTetrominoContainer.regX = this.game.currTetromino.topLeft.col * this.BLOCK_WIDTH;
-    this.currTetrominoContainer.regY = this.game.currTetromino.topLeft.row * this.BLOCK_WIDTH;
-    this.currTetrominoId = this.game.currTetromino.id;
+    if (this.currTetrominoId !== this.game.currTetromino.id) {
+      this.currTetrominoId = this.game.currTetromino.id;
+      this.currTetrominoContainer.removeAllChildren();
+      this.currTetrominoContainer.regX =
+        (this.game.currTetromino.topLeft.col + this.game.currTetromino.middle.col) * this.BLOCK_WIDTH;
+      this.currTetrominoContainer.regY =
+        (this.game.currTetromino.topLeft.row + this.game.currTetromino.middle.row) * this.BLOCK_WIDTH;
 
-    for (let i = 0; i < this.game.currTetromino.length; i++) {
-      for (let j = 0; j < this.game.currTetromino[0].length; j++) {
-        if (this.game.currTetromino[i][j]) {
-          this.drawBlock(
-            this.game.currTetromino.topLeft.row + i,
-            this.game.currTetromino.topLeft.col + j,
-            this.tetrominoColors[this.game.currTetromino[i][j]],
-            this.currTetrominoContainer,
-            'white',
-          );
+      for (let i = 0; i < this.game.currTetromino.length; i++) {
+        for (let j = 0; j < this.game.currTetromino[0].length; j++) {
+          if (this.game.currTetromino[i][j]) {
+            const block = this.drawBlock(
+              this.game.currTetromino.topLeft.row + i,
+              this.game.currTetromino.topLeft.col + j,
+              this.tetrominoColors[this.game.currTetromino[i][j]],
+              'white',
+            );
+            this.currTetrominoContainer.addChild(block);
+          }
         }
       }
     }
 
-    this.stage.addChild(this.currTetrominoContainer);
     this.currTetrominoContainer.x = this.game.currTetromino.topLeft.col * this.BLOCK_WIDTH;
     this.currTetrominoContainer.y = this.game.currTetromino.topLeft.row * this.BLOCK_WIDTH;
     this.stage.update();
