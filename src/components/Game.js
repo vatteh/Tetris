@@ -50,7 +50,7 @@ class Game extends Component {
       gameArray.push(Game.newRow(width));
     }
 
-    Object.entries(tetrominoRotations).forEach((pair) => {
+    Object.entries(tetrominoRotations).forEach(pair => {
       const [tetrominoLetter, rotations] = pair;
 
       rotations.forEach((val, index, array) => {
@@ -71,7 +71,7 @@ class Game extends Component {
 
   setUpKeyEvents(startGame) {
     if (startGame) {
-      document.body.onkeydown = (e) => {
+      document.body.onkeydown = e => {
         if (e.keyCode === 37 || e.keyCode === 40 || e.keyCode === 39 || e.keyCode === 32) {
           this.moveTetromino(e.keyCode, this.currTetromino);
         } else if (e.keyCode === 38) {
@@ -86,7 +86,7 @@ class Game extends Component {
   randomizeTetrominoOrder() {
     // Randomize array element order in-place.
     // Using Fisher-Yates shuffle algorithm.
-    const shuffleArray = (aRay) => {
+    const shuffleArray = aRay => {
       for (let i = aRay.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         const temp = aRay[i];
@@ -134,11 +134,11 @@ class Game extends Component {
       col: potentialTetrominoMiddlePoint.col - potentialTetromino.middle.col,
     };
 
-    potentialTetromino.id = this.currTetromino.id;
+    potentialTetromino.id = this.idIncrement++;
 
     if (this.checkCollisions(potentialTetromino.topLeft.row, potentialTetromino.topLeft.col, potentialTetromino)) {
       this.currTetromino = potentialTetromino;
-      this.renderEngine.render();
+      this.renderEngine.rotateCurrTetromino(90);
       return true;
     }
     return false;
@@ -350,7 +350,7 @@ class Game extends Component {
       }
     }
 
-    clumps.forEach((clump) => {
+    clumps.forEach(clump => {
       for (let a = 0, len = clump.length; a < len; a++) {
         for (let b = 0, len2 = clump[0].length; b < len2; b++) {
           if (remainderBoardCopy[clump.topLeft.row + a][clump.topLeft.col + b] > 0) {

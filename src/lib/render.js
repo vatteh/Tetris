@@ -30,11 +30,9 @@ class RenderEngine {
 
     this.landedBoardContainer = new createjs.Container();
     this.ghostContainer = new createjs.Container();
-    this.currTetrominoContainer = new createjs.Container();
 
-    this.stage.addChild(this.currTetrominoContainer);
-    this.stage.addChild(this.ghostContainer);
     this.stage.addChild(this.landedBoardContainer);
+    this.stage.addChild(this.ghostContainer);
   }
 
   // draw a single square at (x, y)
@@ -166,37 +164,43 @@ class RenderEngine {
     this.nextStage.update();
   }
 
+  rotateCurrTetromino(deg) {
+    if (this.game.currTetromino.tetrominoRotations.length > 1) {
+      this.currTetrominoContainer.rotation += deg;
+      this.renderGhost();
+      this.stage.update();
+    }
+  }
+
   // draws the landed board and the current Tetromino
   render() {
-    this.renderLandedGrid();
     this.renderGhost();
+    this.renderLandedGrid();
 
-    // render the current Tetromino
     if (this.currTetrominoId !== this.game.currTetromino.id) {
       this.currTetrominoId = this.game.currTetromino.id;
-      this.currTetrominoContainer.removeAllChildren();
-      this.currTetrominoContainer.regX =
-        (this.game.currTetromino.topLeft.col + this.game.currTetromino.middle.col) * this.BLOCK_WIDTH;
-      this.currTetrominoContainer.regY =
-        (this.game.currTetromino.topLeft.row + this.game.currTetromino.middle.row) * this.BLOCK_WIDTH;
+      this.stage.removeChild(this.currTetrominoContainer);
+      this.currTetrominoContainer = new createjs.Container();
 
       for (let i = 0; i < this.game.currTetromino.length; i++) {
         for (let j = 0; j < this.game.currTetromino[0].length; j++) {
           if (this.game.currTetromino[i][j]) {
-            const block = this.drawBlock(
-              this.game.currTetromino.topLeft.row + i,
-              this.game.currTetromino.topLeft.col + j,
-              this.tetrominoColors[this.game.currTetromino[i][j]],
-              'white',
-            );
+            const block = this.drawBlock(i, j, this.tetrominoColors[this.game.currTetromino[i][j]], 'white');
             this.currTetrominoContainer.addChild(block);
           }
         }
       }
+
+      this.currTetrominoContainer.regX = this.game.currTetromino.middle.col * this.BLOCK_WIDTH + this.BLOCK_WIDTH / 2;
+      this.currTetrominoContainer.regY = this.game.currTetromino.middle.row * this.BLOCK_WIDTH + this.BLOCK_WIDTH / 2;
+      this.stage.addChild(this.currTetrominoContainer);
     }
 
-    this.currTetrominoContainer.x = this.game.currTetromino.topLeft.col * this.BLOCK_WIDTH;
-    this.currTetrominoContainer.y = this.game.currTetromino.topLeft.row * this.BLOCK_WIDTH;
+    this.currTetrominoContainer.x =
+      this.game.currTetromino.topLeft.col * this.BLOCK_WIDTH + this.currTetrominoContainer.regX;
+    this.currTetrominoContainer.y =
+      this.game.currTetromino.topLeft.row * this.BLOCK_WIDTH + this.currTetrominoContainer.regY;
+
     this.stage.update();
   }
 }

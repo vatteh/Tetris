@@ -4,6 +4,7 @@
     "react"
   ],
   "rules": {
+    "arrow-parens": [0],
     "max-len": [1, 120, 2, {ignoreComments: true}],
     "prop-types": [0],
     "no-unused-vars": [0],
