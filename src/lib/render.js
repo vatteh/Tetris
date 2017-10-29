@@ -33,6 +33,9 @@ class RenderEngine {
 
     this.stage.addChild(this.landedBoardContainer);
     this.stage.addChild(this.ghostContainer);
+
+    createjs.Ticker.setFPS(60);
+    createjs.Ticker.addEventListener('tick', this.stage);
   }
 
   // draw a single square at (x, y)
@@ -166,14 +169,14 @@ class RenderEngine {
 
   rotateCurrTetromino(deg) {
     if (this.game.currTetromino.tetrominoRotations.length > 1) {
-      this.currTetrominoContainer.rotation += deg;
+      const degTarget = this.currTetrominoContainer.rotation + deg;
+      createjs.Tween.get(this.currTetrominoContainer).to({ rotation: degTarget, override: true }, 30);
       this.renderGhost();
-      this.stage.update();
     }
   }
 
   // draws the landed board and the current Tetromino
-  render() {
+  render(callback = () => {}) {
     this.renderGhost();
     this.renderLandedGrid();
 
@@ -193,15 +196,19 @@ class RenderEngine {
 
       this.currTetrominoContainer.regX = this.game.currTetromino.middle.col * this.BLOCK_WIDTH + this.BLOCK_WIDTH / 2;
       this.currTetrominoContainer.regY = this.game.currTetromino.middle.row * this.BLOCK_WIDTH + this.BLOCK_WIDTH / 2;
+      this.currTetrominoContainer.x =
+        this.game.currTetromino.topLeft.col * this.BLOCK_WIDTH + this.currTetrominoContainer.regX;
+      this.currTetrominoContainer.y =
+        this.game.currTetromino.topLeft.row * this.BLOCK_WIDTH + this.currTetrominoContainer.regY;
       this.stage.addChild(this.currTetrominoContainer);
     }
 
-    this.currTetrominoContainer.x =
-      this.game.currTetromino.topLeft.col * this.BLOCK_WIDTH + this.currTetrominoContainer.regX;
-    this.currTetrominoContainer.y =
-      this.game.currTetromino.topLeft.row * this.BLOCK_WIDTH + this.currTetrominoContainer.regY;
-
-    this.stage.update();
+    const x = this.game.currTetromino.topLeft.col * this.BLOCK_WIDTH + this.currTetrominoContainer.regX;
+    const y = this.game.currTetromino.topLeft.row * this.BLOCK_WIDTH + this.currTetrominoContainer.regY;
+    createjs.Tween
+      .get(this.currTetrominoContainer)
+      .to({ x, y, override: true }, 50, createjs.Ease.quartOut)
+      .call(callback);
   }
 }
 

@@ -189,8 +189,8 @@ class Game extends Component {
       return false;
     }
 
+    // the Tetromino can move to new position
     if (this.checkCollisions(potentialTopLeftRow, potentialTopLeftCol, tetromino)) {
-      // the Tetromino can move to new position
       tetromino.topLeft.row = potentialTopLeftRow;
       tetromino.topLeft.col = potentialTopLeftCol;
 
@@ -198,13 +198,24 @@ class Game extends Component {
       return true;
     }
 
+    // the Tetromino cannot move down so the shape will land
     if (keyCode === 40 || keyCode === 32 || keyCode === -1 || keyCode === -2) {
-      // the Tetromino cannot move down so the shape will land
-      this.landTetromino(tetromino);
-      if (keyCode !== -1) {
-        this.addTetromino();
-        this.renderEngine.render();
+      if (keyCode === 32) {
+        // render the drop first, then land
+        this.renderEngine.render(() => {
+          this.landTetromino(tetromino);
+          this.addTetromino();
+          this.renderEngine.render();
+        });
+      } else {
+        this.landTetromino(tetromino);
+
+        if (keyCode !== -1) {
+          this.addTetromino();
+          this.renderEngine.render();
+        }
       }
+
       return true;
     }
 
