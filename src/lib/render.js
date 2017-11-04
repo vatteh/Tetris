@@ -175,40 +175,74 @@ class RenderEngine {
     }
   }
 
+  clearRows(rowsCleared, callback) {
+    const blocks = [];
+    rowsCleared.forEach(row => {
+      for (let i = 0; i < this.game.width; i++) {
+        const block = this.landedBoardContainer.getObjectUnderPoint(
+          i * this.BLOCK_WIDTH + this.BLOCK_WIDTH / 2,
+          row * this.BLOCK_WIDTH + this.BLOCK_WIDTH / 2,
+        );
+        blocks.push(block);
+      }
+    });
+
+    return new Promise((resolve, reject) => {
+      let animationsDone = 0;
+      const oneDone = () => {
+        animationsDone++;
+
+        if (animationsDone === blocks.length) {
+          resolve();
+        }
+      };
+
+      blocks.forEach(block => {
+        block.alpha = 1;
+        createjs.Tween
+          .get(block)
+          .to({ alpha: 0 }, 150)
+          .call(oneDone);
+      });
+    });
+  }
+
   // draws the landed board and the current Tetromino
-  render(callback = () => {}) {
-    this.renderGhost();
-    this.renderLandedGrid();
+  render() {
+    return new Promise((resolve, reject) => {
+      this.renderGhost();
+      this.renderLandedGrid();
 
-    if (this.currTetrominoId !== this.game.currTetromino.id) {
-      this.currTetrominoId = this.game.currTetromino.id;
-      this.stage.removeChild(this.currTetrominoContainer);
-      this.currTetrominoContainer = new createjs.Container();
+      if (this.currTetrominoId !== this.game.currTetromino.id) {
+        this.currTetrominoId = this.game.currTetromino.id;
+        this.stage.removeChild(this.currTetrominoContainer);
+        this.currTetrominoContainer = new createjs.Container();
 
-      for (let i = 0; i < this.game.currTetromino.length; i++) {
-        for (let j = 0; j < this.game.currTetromino[0].length; j++) {
-          if (this.game.currTetromino[i][j]) {
-            const block = this.drawBlock(i, j, this.tetrominoColors[this.game.currTetromino[i][j]], 'white');
-            this.currTetrominoContainer.addChild(block);
+        for (let i = 0; i < this.game.currTetromino.length; i++) {
+          for (let j = 0; j < this.game.currTetromino[0].length; j++) {
+            if (this.game.currTetromino[i][j]) {
+              const block = this.drawBlock(i, j, this.tetrominoColors[this.game.currTetromino[i][j]], 'white');
+              this.currTetrominoContainer.addChild(block);
+            }
           }
         }
+
+        this.currTetrominoContainer.regX = this.game.currTetromino.middle.col * this.BLOCK_WIDTH + this.BLOCK_WIDTH / 2;
+        this.currTetrominoContainer.regY = this.game.currTetromino.middle.row * this.BLOCK_WIDTH + this.BLOCK_WIDTH / 2;
+        this.currTetrominoContainer.x =
+          this.game.currTetromino.topLeft.col * this.BLOCK_WIDTH + this.currTetrominoContainer.regX;
+        this.currTetrominoContainer.y =
+          this.game.currTetromino.topLeft.row * this.BLOCK_WIDTH + this.currTetrominoContainer.regY;
+        this.stage.addChild(this.currTetrominoContainer);
       }
 
-      this.currTetrominoContainer.regX = this.game.currTetromino.middle.col * this.BLOCK_WIDTH + this.BLOCK_WIDTH / 2;
-      this.currTetrominoContainer.regY = this.game.currTetromino.middle.row * this.BLOCK_WIDTH + this.BLOCK_WIDTH / 2;
-      this.currTetrominoContainer.x =
-        this.game.currTetromino.topLeft.col * this.BLOCK_WIDTH + this.currTetrominoContainer.regX;
-      this.currTetrominoContainer.y =
-        this.game.currTetromino.topLeft.row * this.BLOCK_WIDTH + this.currTetrominoContainer.regY;
-      this.stage.addChild(this.currTetrominoContainer);
-    }
-
-    const x = this.game.currTetromino.topLeft.col * this.BLOCK_WIDTH + this.currTetrominoContainer.regX;
-    const y = this.game.currTetromino.topLeft.row * this.BLOCK_WIDTH + this.currTetrominoContainer.regY;
-    createjs.Tween
-      .get(this.currTetrominoContainer)
-      .to({ x, y, override: true }, 50, createjs.Ease.quartOut)
-      .call(callback);
+      const x = this.game.currTetromino.topLeft.col * this.BLOCK_WIDTH + this.currTetrominoContainer.regX;
+      const y = this.game.currTetromino.topLeft.row * this.BLOCK_WIDTH + this.currTetrominoContainer.regY;
+      createjs.Tween
+        .get(this.currTetrominoContainer)
+        .to({ x, y, override: true }, 50, createjs.Ease.quartOut)
+        .call(resolve);
+    });
   }
 }
 

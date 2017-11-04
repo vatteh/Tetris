@@ -24,6 +24,7 @@ class Game extends Component {
     this.idIncrement = 0;
     this.randomizeTetrominoOrder();
     this.addTetromino();
+    this.controlsEnabled = true;
     this.setUpKeyEvents(true);
     this.intervalID = null;
     this.playSpeed = 1000;
@@ -72,9 +73,9 @@ class Game extends Component {
   setUpKeyEvents(startGame) {
     if (startGame) {
       document.body.onkeydown = e => {
-        if (e.keyCode === 37 || e.keyCode === 40 || e.keyCode === 39 || e.keyCode === 32) {
+        if ((e.keyCode === 37 || e.keyCode === 40 || e.keyCode === 39 || e.keyCode === 32) && this.controlsEnabled) {
           this.moveTetromino(e.keyCode, this.currTetromino);
-        } else if (e.keyCode === 38) {
+        } else if (e.keyCode === 38 && this.controlsEnabled) {
           this.rotateTetromino(e.keyCode);
         }
       };
@@ -200,20 +201,38 @@ class Game extends Component {
 
     // the Tetromino cannot move down so the shape will land
     if (keyCode === 40 || keyCode === 32 || keyCode === -1 || keyCode === -2) {
+      this.controlsEnabled = false;
+      this.pausePlay();
       if (keyCode === 32) {
         // render the drop first, then land
-        this.renderEngine.render(() => {
-          this.landTetromino(tetromino);
-          this.addTetromino();
-          this.renderEngine.render();
-        });
+        this.renderEngine
+          .render()
+          .then(() => this.landTetromino(tetromino, keyCode))
+          .then(() => {
+            this.addTetromino();
+            return this.renderEngine.render();
+          })
+          .then(() => {
+            if (!this.state.gameOver) {
+              this.setPlay(this.playSpeed);
+              this.controlsEnabled = true;
+            }
+          });
       } else {
-        this.landTetromino(tetromino);
-
-        if (keyCode !== -1) {
-          this.addTetromino();
-          this.renderEngine.render();
-        }
+        this.landTetromino(tetromino, keyCode)
+          .then(() => {
+            if (keyCode !== -1) {
+              this.addTetromino();
+              return this.renderEngine.render();
+            }
+            return Promise.resolve();
+          })
+          .then(() => {
+            if (!this.state.gameOver) {
+              this.setPlay(this.playSpeed);
+              this.controlsEnabled = true;
+            }
+          });
       }
 
       return true;
@@ -241,7 +260,7 @@ class Game extends Component {
     return true;
   }
 
-  landTetromino(tetromino) {
+  landTetromino(tetromino, keyCode) {
     for (let row = 0; row < tetromino.length; row++) {
       for (let col = 0; col < tetromino[row].length; col++) {
         if (tetromino[row][col] !== 0) {
@@ -250,7 +269,7 @@ class Game extends Component {
       }
     }
 
-    this.clearRowsAdvance();
+    return this.clearRowsAdvance(keyCode);
   }
 
   addTetromino() {
@@ -291,26 +310,33 @@ class Game extends Component {
     this.calculateRowCombo(rowCombo, i);
   }
 
-  clearRowsAdvance() {
-    let lastRowCleared;
+  clearRowsAdvance(keyCode) {
+    const rowsCleared = [];
     let rowCombo = 0;
+
+    this.renderEngine.render(); // render landedGrid first so that all blocks to be removed are on the canvas
     for (let i = 0, len = this.landedGrid.length; i < len; i++) {
       if (this.landedGrid[i].indexOf(0) === -1) {
         // no 0's means row is filled
+        rowsCleared.push(i);
         this.landedGrid.splice(i, 1, Game.newRow(this.width));
         rowCombo++;
-        lastRowCleared = i;
       }
     }
 
-    if (lastRowCleared !== undefined) {
-      this.calculateRowCombo(rowCombo, lastRowCleared);
-      const clumps = this.findClumps(lastRowCleared); // from this row up, we need to find the 'clumps' of blocks and treat them as falling Tetrominos
+    if (rowsCleared.length) {
+      return this.renderEngine.clearRows(rowsCleared).then(() => {
+        const lastRowCleared = rowsCleared.pop();
+        this.calculateRowCombo(rowCombo, lastRowCleared);
+        const clumps = this.findClumps(lastRowCleared); // from this row up, we need to find the 'clumps' of blocks and treat them as falling Tetrominos
 
-      while (clumps.length > 0) {
-        this.moveTetromino(-1, clumps.pop());
-      }
+        while (clumps.length > 0) {
+          this.moveTetromino(-1, clumps.pop());
+        }
+      });
     }
+
+    return Promise.resolve();
   }
 
   calculateRowCombo(rowsCleared, lastRowCleared) {
@@ -414,6 +440,10 @@ class Game extends Component {
     this.intervalID = window.setInterval(() => {
       this.moveTetromino(-2, this.currTetromino);
     }, speed);
+  }
+
+  pausePlay() {
+    clearInterval(this.intervalID);
   }
 
   render() {
