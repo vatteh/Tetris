@@ -179,10 +179,11 @@ class RenderEngine {
     const blocks = [];
     rowsCleared.forEach(row => {
       for (let i = 0; i < this.game.width; i++) {
-        const block = this.landedBoardContainer.getObjectUnderPoint(
-          i * this.BLOCK_WIDTH + this.BLOCK_WIDTH / 2,
-          row * this.BLOCK_WIDTH + this.BLOCK_WIDTH / 2,
-        );
+        const x = i * this.BLOCK_WIDTH + this.BLOCK_WIDTH / 2;
+        const y = row * this.BLOCK_WIDTH + this.BLOCK_WIDTH / 2;
+        const block = this.landedBoardContainer.getObjectUnderPoint(x, y);
+        block.scaleToX = x;
+        block.scaleToY = y;
         blocks.push(block);
       }
     });
@@ -201,7 +202,7 @@ class RenderEngine {
         block.alpha = 1;
         createjs.Tween
           .get(block)
-          .to({ alpha: 0 }, 150)
+          .to({ scaleX: 0, scaleY: 0, x: block.scaleToX, y: block.scaleToY }, 150, createjs.Ease.backIn)
           .call(oneDone);
       });
     });
