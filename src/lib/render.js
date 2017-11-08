@@ -169,9 +169,15 @@ class RenderEngine {
 
   rotateCurrTetromino(deg) {
     if (this.game.currTetromino.tetrominoRotations.length > 1) {
-      const degTarget = this.currTetrominoContainer.rotation + deg;
-      createjs.Tween.get(this.currTetrominoContainer).to({ rotation: degTarget, override: true }, 30);
+      this.inRotateAnimation = true;
       this.renderGhost();
+      const degTarget = this.currTetrominoContainer.rotation + deg;
+      createjs.Tween
+        .get(this.currTetrominoContainer)
+        .to({ rotation: degTarget, override: true }, 30)
+        .call(() => {
+          this.inRotateAnimation = false;
+        });
     }
   }
 

@@ -137,7 +137,10 @@ class Game extends Component {
 
     potentialTetromino.id = this.idIncrement++;
 
-    if (this.checkCollisions(potentialTetromino.topLeft.row, potentialTetromino.topLeft.col, potentialTetromino)) {
+    if (
+      !this.renderEngine.inRotateAnimation &&
+      this.checkCollisions(potentialTetromino.topLeft.row, potentialTetromino.topLeft.col, potentialTetromino)
+    ) {
       this.currTetromino = potentialTetromino;
       this.renderEngine.rotateCurrTetromino(90);
       return true;
