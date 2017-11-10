@@ -1,3 +1,5 @@
+/* global createjs */
+
 import React, { Component } from 'react';
 
 import RenderEngine from '../lib/render';
@@ -28,6 +30,12 @@ class Game extends Component {
     this.setUpKeyEvents(true);
     this.intervalID = null;
     this.playSpeed = 1000;
+
+    this.soundIds = Game.loadSounds();
+    createjs.Sound.addEventListener('fileload', () => {
+      const instance = Game.playSound(this.soundIds.music);
+      instance.volume = 0.15;
+    });
   }
 
   static newRow(width) {
@@ -37,6 +45,24 @@ class Game extends Component {
     }
 
     return aRay;
+  }
+
+  static loadSounds() {
+    const ids = {
+      music: 'music',
+    };
+
+    createjs.Sound.registerSound('sounds/music.mp3', ids.music);
+
+    return ids;
+  }
+
+  static playSound(id) {
+    return createjs.Sound.play(id, { loop: -1 });
+  }
+
+  static stopSound(id) {
+    return createjs.Sound.stop(id);
   }
 
   static deepCopy(outerArray) {
@@ -431,6 +457,7 @@ class Game extends Component {
   }
 
   gameOver() {
+    Game.stopSound(this.soundIds.music);
     clearInterval(this.intervalID);
     this.renderEngine.render();
     this.setUpKeyEvents(false);

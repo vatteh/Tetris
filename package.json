@@ -3,8 +3,7 @@
     "version": "1.0.0",
     "description": "learning canvas with javascript",
     "scripts": {
-        "start":
-            "webpack-dev-server --progress --colors --hot --config ./webpack.dev.config.js",
+        "start": "webpack-dev-server --progress --colors --hot --config ./webpack.dev.config.js",
         "prod": "node server.js",
         "postinstall": "webpack --config ./webpack.prod.config.js -p"
     },
@@ -15,7 +14,11 @@
     "author": "Victor Atteh",
     "license": "ISC",
     "babel": {
-        "presets": ["es2015", "react", "stage-2"]
+        "presets": [
+            "es2015",
+            "react",
+            "stage-2"
+        ]
     },
     "devDependencies": {
         "eslint": "^3.19.0",
