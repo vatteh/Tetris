@@ -17,9 +17,14 @@ class Game extends Component {
       gameOver: false,
     };
 
+    this.soundController = new SoundController();
     this.landedGrid = Game.generateBoard(props.height, props.width);
     this.height = this.landedGrid.length;
     this.width = this.landedGrid[0].length;
+    this.startGame();
+  }
+
+  startGame() {
     this.currTetromino = null;
     this.nextTetromino = null;
     this.tetrominoOrder = [];
@@ -31,8 +36,6 @@ class Game extends Component {
     this.setUpKeyEvents(true);
     this.intervalID = null;
     this.playSpeed = 1000;
-
-    this.soundController = new SoundController();
   }
 
   static newRow(width) {
@@ -451,6 +454,21 @@ class Game extends Component {
     clearInterval(this.intervalID);
   }
 
+  restartGame() {
+    this.soundController.playThemeSong();
+    this.setState({
+      level: 1,
+      linesCleared: 0,
+      score: 0,
+      gameOver: false,
+    });
+    this.landedGrid = Game.generateBoard(this.height, this.width);
+    this.startGame();
+    this.renderEngine.render();
+    this.renderEngine.renderNextBoard();
+    this.setPlay(this.playSpeed);
+  }
+
   render() {
     const { level, linesCleared, score, gameOver } = this.state;
     const { width, height } = this.props;
@@ -469,7 +487,14 @@ class Game extends Component {
             <p id="score">Score: {score}</p>
           </div>
           <h1 id="game-title">Tetris</h1>
-          {gameOver && <p id="game-over">Game Over</p>}
+          {gameOver && (
+            <div>
+              <p id="game-over">Game Over</p>
+              <button className="game-over-button" onClick={this.restartGame.bind(this)}>
+                Play Again
+              </button>
+            </div>
+          )}
         </div>
       </div>
     );

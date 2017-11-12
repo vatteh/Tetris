@@ -46,3 +46,19 @@ canvas#nextboard {
   display: table;
   clear: both;
 }
+
+.game-over-button {
+  color: #ffffff;
+  font-size: 20px;
+  background: #a8a8a8;
+  padding: 10px 20px 10px 20px;
+  border-radius: 0;
+  border: 0;
+  text-decoration: none;
+}
+
+.game-over-button:hover {
+  background: #bfbfbf;
+  text-decoration: none;
+  cursor: pointer;
+}

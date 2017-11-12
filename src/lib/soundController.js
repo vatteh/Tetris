@@ -27,6 +27,7 @@ class SoundController {
   }
 
   playThemeSong() {
+    this.sound.stop(GAME_OVER);
     const instance = this.sound.play(MUSIC, { loop: -1 });
     instance.volume = 0.1;
   }
