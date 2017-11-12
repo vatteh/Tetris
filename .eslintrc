@@ -10,7 +10,8 @@
     "no-unused-vars": [0],
     "no-param-reassign": ["error", { "props": false }],
     "no-plusplus": [0],
-    "no-mixed-operators": [0]
+    "no-mixed-operators": [0],
+    "no-console": [0]
   },
   "extends": ["airbnb-base"],
   "env": {

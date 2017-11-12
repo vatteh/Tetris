@@ -3,6 +3,7 @@
 import React, { Component } from 'react';
 
 import RenderEngine from '../lib/render';
+import SoundController, { MUSIC, ROTATE, DROP, LINE_CLEAR, MOVE, LEVEL_UP, GAME_OVER } from '../lib/soundController';
 import tetrominoRotations from '../lib/tetrominoRotations';
 
 class Game extends Component {
@@ -31,11 +32,7 @@ class Game extends Component {
     this.intervalID = null;
     this.playSpeed = 1000;
 
-    this.soundIds = Game.loadSounds();
-    createjs.Sound.addEventListener('fileload', () => {
-      const instance = Game.playSound(this.soundIds.music);
-      instance.volume = 0.15;
-    });
+    this.soundController = new SoundController();
   }
 
   static newRow(width) {
@@ -45,20 +42,6 @@ class Game extends Component {
     }
 
     return aRay;
-  }
-
-  static loadSounds() {
-    const ids = {
-      music: 'music',
-    };
-
-    createjs.Sound.registerSound('sounds/music.mp3', ids.music);
-
-    return ids;
-  }
-
-  static playSound(id) {
-    return createjs.Sound.play(id, { loop: -1 });
   }
 
   static stopSound(id) {
@@ -169,6 +152,7 @@ class Game extends Component {
     ) {
       this.currTetromino = potentialTetromino;
       this.renderEngine.rotateCurrTetromino(90);
+      this.soundController.playSound(ROTATE);
       return true;
     }
     return false;
@@ -224,6 +208,7 @@ class Game extends Component {
       tetromino.topLeft.row = potentialTopLeftRow;
       tetromino.topLeft.col = potentialTopLeftCol;
 
+      this.soundController.playSound(MOVE, keyCode === -2 ? 0.05 : 0.1);
       this.renderEngine.render();
       return true;
     }
@@ -239,6 +224,7 @@ class Game extends Component {
           .then(() => this.landTetromino(tetromino, keyCode))
           .then(() => {
             this.addTetromino();
+            this.soundController.playSound(DROP);
             return this.renderEngine.render();
           })
           .then(() => {
@@ -252,6 +238,7 @@ class Game extends Component {
           .then(() => {
             if (keyCode !== -1) {
               this.addTetromino();
+              this.soundController.playSound(DROP, 0.1);
               return this.renderEngine.render();
             }
             return Promise.resolve();
@@ -354,6 +341,7 @@ class Game extends Component {
     }
 
     if (rowsCleared.length) {
+      this.soundController.playSound(LINE_CLEAR);
       return this.renderEngine.clearRows(rowsCleared).then(() => {
         const lastRowCleared = rowsCleared.pop();
         this.calculateRowCombo(rowCombo, lastRowCleared);
@@ -376,6 +364,7 @@ class Game extends Component {
 
   levelUp() {
     if (this.state.linesCleared / 10 >= this.state.level) {
+      this.soundController.playSound(LEVEL_UP);
       this.state.level++;
       this.playSpeed = this.playSpeed / 1.3;
       this.setPlay(this.playSpeed);
@@ -457,8 +446,9 @@ class Game extends Component {
   }
 
   gameOver() {
-    Game.stopSound(this.soundIds.music);
     clearInterval(this.intervalID);
+    this.soundController.stopThemeSong();
+    this.soundController.playSound(GAME_OVER);
     this.renderEngine.render();
     this.setUpKeyEvents(false);
     this.setState({ gameOver: true });
