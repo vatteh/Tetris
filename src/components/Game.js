@@ -217,39 +217,24 @@ class Game extends Component {
     if (keyCode === 40 || keyCode === 32 || keyCode === -1 || keyCode === -2) {
       this.controlsEnabled = false;
       this.pausePlay();
-      if (keyCode === 32) {
-        // render the drop first, then land
-        this.renderEngine
-          .render()
-          .then(() => this.landTetromino(tetromino, keyCode))
-          .then(() => {
+
+      // render the drop first, then land
+      (keyCode === 32 ? this.renderEngine.render() : Promise.resolve())
+        .then(() => this.landTetromino(tetromino, keyCode))
+        .then(() => {
+          if (keyCode !== -1) {
             this.addTetromino();
-            this.soundController.playSound(DROP);
+            this.soundController.playSound(DROP, keyCode === 32 ? 0.25 : 0.1);
             return this.renderEngine.render();
-          })
-          .then(() => {
-            if (!this.state.gameOver) {
-              this.setPlay(this.playSpeed);
-              this.controlsEnabled = true;
-            }
-          });
-      } else {
-        this.landTetromino(tetromino, keyCode)
-          .then(() => {
-            if (keyCode !== -1) {
-              this.addTetromino();
-              this.soundController.playSound(DROP, 0.1);
-              return this.renderEngine.render();
-            }
-            return Promise.resolve();
-          })
-          .then(() => {
-            if (!this.state.gameOver) {
-              this.setPlay(this.playSpeed);
-              this.controlsEnabled = true;
-            }
-          });
-      }
+          }
+          return Promise.resolve();
+        })
+        .then(() => {
+          if (!this.state.gameOver) {
+            this.setPlay(this.playSpeed);
+            this.controlsEnabled = true;
+          }
+        });
 
       return true;
     }
